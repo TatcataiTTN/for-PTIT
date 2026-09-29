@@ -2,6 +2,17 @@ import os, json, html, re
 from hx import *
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))   # .../Discrete-Math
 NAV=[('Trang chủ','{r}vi/index.html'),('Lộ trình','{r}vi/index.html#lo-trinh'),('Luyện đề','{r}vi/luyen-de/index.html'),('Cấu trúc đề thi','{r}vi/cau-truc-de/index.html'),('Tài liệu','{r}vi/tai-lieu/index.html')]
+SRC=[('19SgNozB5mT-G2cJXGYmimcKXKzROf3t7','0-Intro_en-da-gop.pdf','slide TRR1 (TS. Đào Thị Thuý Quỳnh)'),
+('1_qNbqwynY-nnEIVpNDDPpZ8oD7nPt_sP','Toán rời rạc 1 - 2016.pdf','bài giảng/giáo trình TRR1 2016 (ThS. Nguyễn Duy Phương)'),
+('1aVoHQjjbqh65QKnllJ5kvWvdErwWY0-M','Bài giảng toán rời rạc 1 PTIT (Studocu)','bài giảng TRR1 2013'),
+('1tFjJLq0G0gCLjrvDNm4L5azCIoeXlBNq','DISCRETE-MATHEMATICS-I.pdf','đề cương INT1358'),
+('13B09M2BpuPPrzpZAFH2rQzuGTkyC8MBx','Ngân hàng câu hỏi thi môn Toán rời rạc 1 (INT 1358) năm 2019 (Studocu)','ngân hàng câu hỏi tự luận'),
+('10dd3kIn8eS1y4LcR_3nsJk0clMyIjzKr','Đề thi kết thúc học phần Toán rời rạc 1, kỳ 1 năm 2023-2024 (Studocu)','đề thi thật'),
+('1pXcMlycn292r_MJ87T_HOHkFm0u_ZwCa','Đề ôn tập trắc nghiệm TRR1 (Mẫu đề 2) (Studocu)','bộ đề trắc nghiệm, Khoa Trí tuệ nhân tạo'),
+('1NkkV0g1k2w2Q2xEN8IH_6avtnp0WX19u','DISCRETE-MATHEMATICS-II.pdf','đề cương INT1359: thuộc TRR2, chỉ để phân loại'),
+('1H7umXkKRJ8YfJFS-mNN3rGVYzDr3H9X4','Ngân hàng câu hỏi tự luận 412TRR Toán rời rạc 2 (Studocu)','thuộc TRR2, chỉ để phân loại')]
+def src_list():
+    return ''.join(f'<li><a href="https://drive.google.com/file/d/{i}/view" target="_blank" rel="noopener">{n}</a> · {d}</li>' for i,n,d in SRC)
 def page(title,body,depth,desc='',scripts=(),extra_head=''):
     r='../'*depth
     nav=''.join(f'<a href="{u.format(r=r)}">{t}</a>' for t,u in NAV)
@@ -13,7 +24,8 @@ def page(title,body,depth,desc='',scripts=(),extra_head=''):
 <header class="top"><div class="wrap"><a class="brand" href="{r}vi/index.html">∑ Toán rời rạc 1 · PTIT</a><nav>{nav}
 <details class="menu"><summary>🎨 Giao diện</summary><div class="pop"><button data-set-theme="light">Sáng</button><button data-set-theme="dark">Tối</button><button data-set-theme="sepia">Sepia</button><hr><button data-set-font="14px">Chữ nhỏ</button><button data-set-font="16px">Chữ vừa</button><button data-set-font="19px">Chữ lớn</button></div></details></nav></div></header>
 <main class="wrap">{body}</main>
-<footer class="foot"><div class="wrap">Tài liệu tự học không chính thức, dựa trên giáo trình Toán rời rạc (PTIT, ThS. Nguyễn Duy Phương), đề cương INT1358 và đề thi các năm. Mọi đáp án số đều được tính và kiểm chứng bằng chương trình; nếu phát hiện sai sót vui lòng báo lại. Đối chiếu đề cương chính thức của giảng viên khi cần.</div></footer>
+<footer class="foot"><div class="wrap"><p><b>Nguồn tài liệu:</b> các file PDF trong thư mục Google Drive <a href="https://drive.google.com/drive/folders/1fSjd2VaR3lK7kNsXpz_zEZJKAeOrao2q?usp=sharing" target="_blank" rel="noopener">drive.google.com/drive/folders/1fSjd2VaR3lK7kNsXpz_zEZJKAeOrao2q</a>:</p><ul style="margin:.3em 0 .8em;padding-left:1.2em">{src_list()}</ul>
+<p>Tài liệu tự học không chính thức của người học, dựa trên các nguồn trên (giáo trình Toán rời rạc PTIT, ThS. Nguyễn Duy Phương; slide TS. Đào Thị Thuý Quỳnh; đề cương INT1358; ngân hàng câu hỏi và đề thi các năm). Mọi đáp án số đều được tính và kiểm chứng bằng chương trình; nếu phát hiện sai sót vui lòng báo lại. Đối chiếu đề cương chính thức của giảng viên khi cần. Nội dung gốc thuộc PTIT và các tác giả tương ứng.</p></div></footer>
 <script src="{r}_shared/theme.js"></script>{sc}</body></html>'''
 def write(relpath,content):
     p=os.path.join(ROOT,relpath); os.makedirs(os.path.dirname(p),exist_ok=True)
