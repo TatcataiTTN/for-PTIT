@@ -1,0 +1,153 @@
+import re, math, itertools, sys, random
+sys.path.insert(0,'..')
+import logic_tools as LT
+from logic_tools import V,N,A,O,I,E,X
+import orig_lib as L
+from orig_lib import sub, T
+from qcore import near_ints
+import knap, tsp
+from cpp_snippets import CPP
+p,q,r=V('p'),V('q'),V('r')
+def TTtxt(f):
+    vs,rows=LT.table(f); h=' | '.join(vs)+' | '+LT.show(f)
+    return h+'\n'+'\n'.join(' | '.join('Đ' if x else 'S' for x in vals)+' | '+('Đ' if res else 'S') for vals,res in rows)
+def TTeq(f,g):
+    vs=sorted(LT.vars_of(f)|LT.vars_of(g)); h=' | '.join(vs)+' | '+LT.show(f)+' | '+LT.show(g)
+    rows=[]
+    for vals in itertools.product([True,False],repeat=len(vs)):
+        env=dict(zip(vs,vals)); rows.append(' | '.join('Đ' if x else 'S' for x in vals)+' | '+('Đ' if LT.ev(f,env) else 'S')+' | '+('Đ' if LT.ev(g,env) else 'S'))
+    return h+'\n'+'\n'.join(rows)
+DER={
+ 'F1':'(p ∧ q) ⇒ p ≡ ¬(p ∧ q) ∨ p   (P ⇒ Q ≡ ¬P ∨ Q)\n≡ (¬p ∨ ¬q) ∨ p   (De Morgan)\n≡ (¬p ∨ p) ∨ ¬q   (giao hoán, kết hợp)\n≡ T ∨ ¬q ≡ T   (phần tử bù, luật nuốt)',
+ 'F2':'p ⇒ (p ∨ q) ≡ ¬p ∨ (p ∨ q)   (P ⇒ Q ≡ ¬P ∨ Q)\n≡ (¬p ∨ p) ∨ q   (kết hợp)\n≡ T ∨ q ≡ T',
+ 'F3':'¬p ⇒ (p ⇒ q) ≡ ¬¬p ∨ (¬p ∨ q)   (P ⇒ Q ≡ ¬P ∨ Q, hai lần)\n≡ p ∨ ¬p ∨ q   (phủ định kép, kết hợp)\n≡ T ∨ q ≡ T',
+ 'F4':'(p ∧ q) ⇒ (p ⇒ q) ≡ ¬(p ∧ q) ∨ (¬p ∨ q)\n≡ ¬p ∨ ¬q ∨ ¬p ∨ q   (De Morgan)\n≡ (¬q ∨ q) ∨ ¬p   (lũy đẳng, giao hoán)\n≡ T ∨ ¬p ≡ T',
+ 'F5':'¬(p ⇒ q) ⇒ p ≡ ¬¬(p ⇒ q) ∨ p   (P ⇒ Q ≡ ¬P ∨ Q)\n≡ (¬p ∨ q) ∨ p   (phủ định kép, P ⇒ Q ≡ ¬P ∨ Q)\n≡ (¬p ∨ p) ∨ q ≡ T',
+ 'F6':'¬(p ⇒ q) ⇒ ¬q ≡ (p ⇒ q) ∨ ¬q   (¬¬ và P ⇒ Q ≡ ¬P ∨ Q)\n≡ ¬p ∨ q ∨ ¬q   (kết hợp)\n≡ ¬p ∨ T ≡ T',
+ 'F7':'[¬p ∧ (p ∨ q)] ⇒ q ≡ ¬[¬p ∧ (p ∨ q)] ∨ q\n≡ p ∨ ¬(p ∨ q) ∨ q   (De Morgan, phủ định kép)\n≡ p ∨ (¬p ∧ ¬q) ∨ q   (De Morgan)\n≡ [(p ∨ ¬p) ∧ (p ∨ ¬q)] ∨ q   (phân phối)\n≡ (p ∨ ¬q) ∨ q ≡ p ∨ (¬q ∨ q) ≡ T',
+ 'F8':'[(p ⇒ q) ∧ (q ⇒ r)] ⇒ (p ⇒ r) ≡ ¬[(¬p ∨ q) ∧ (¬q ∨ r)] ∨ (¬p ∨ r)\n≡ [(p ∧ ¬q) ∨ (q ∧ ¬r)] ∨ ¬p ∨ r   (De Morgan)\n≡ [(p ∧ ¬q) ∨ ¬p] ∨ [(q ∧ ¬r) ∨ r]   (nhóm)\n≡ (¬p ∨ ¬q) ∨ (q ∨ r)   (hấp thụ/phân phối: (p ∧ ¬q) ∨ ¬p ≡ ¬q ∨ ¬p; (q ∧ ¬r) ∨ r ≡ q ∨ r)\n≡ (¬q ∨ q) ∨ ¬p ∨ r ≡ T',
+ 'F9':'[p ∧ (p ⇒ q)] ⇒ q ≡ ¬[p ∧ (¬p ∨ q)] ∨ q\n≡ ¬p ∨ ¬(¬p ∨ q) ∨ q   (De Morgan)\n≡ ¬p ∨ (p ∧ ¬q) ∨ q   (De Morgan, phủ định kép)\n≡ [(¬p ∨ p) ∧ (¬p ∨ ¬q)] ∨ q   (phân phối)\n≡ (¬p ∨ ¬q) ∨ q ≡ ¬p ∨ (¬q ∨ q) ≡ T',
+ 'F10':'[(p ∨ q) ∧ (p ⇒ r) ∧ (q ⇒ r)] ⇒ r ≡ ¬[(p ∨ q) ∧ (¬p ∨ r) ∧ (¬q ∨ r)] ∨ r\n≡ (¬p ∧ ¬q) ∨ (p ∧ ¬r) ∨ (q ∧ ¬r) ∨ r   (De Morgan)\n≡ (¬p ∧ ¬q) ∨ [(p ∨ q) ∧ ¬r] ∨ r   (phân phối ngược)\n≡ (¬p ∧ ¬q) ∨ (p ∨ q) ∨ r   (vì (X ∧ ¬r) ∨ r ≡ X ∨ r)\n≡ ¬(p ∨ q) ∨ (p ∨ q) ∨ r ≡ T',
+ 'E1':'p ⇔ q ≡ (p ⇒ q) ∧ (q ⇒ p)   (định nghĩa)\n≡ (¬p ∨ q) ∧ (¬q ∨ p)\n≡ (¬p ∧ ¬q) ∨ (¬p ∧ p) ∨ (q ∧ ¬q) ∨ (q ∧ p)   (phân phối)\n≡ (¬p ∧ ¬q) ∨ F ∨ F ∨ (p ∧ q) ≡ (p ∧ q) ∨ (¬p ∧ ¬q)',
+ 'E2':'p ⇒ q ≡ ¬p ∨ q   (định nghĩa)\n≡ q ∨ ¬p   (giao hoán)\n≡ ¬¬q ∨ ¬p   (phủ định kép)\n≡ ¬q ⇒ ¬p   (P ⇒ Q ≡ ¬P ∨ Q)',
+ 'E3':'p ⊕ q ≡ (p ∧ ¬q) ∨ (¬p ∧ q)   (định nghĩa)\n¬(p ⊕ q) ≡ ¬(p ∧ ¬q) ∧ ¬(¬p ∧ q)   (De Morgan)\n≡ (¬p ∨ q) ∧ (p ∨ ¬q) ≡ (p ⇒ q) ∧ (q ⇒ p) ≡ p ⇔ q',
+ 'E4':'¬(p ⇔ q) ≡ p ⊕ q ≡ (p ∧ ¬q) ∨ (¬p ∧ q)   (phủ định của ⇔)\n¬p ⇔ q ≡ (¬p ∧ q) ∨ (¬¬p ∧ ¬q)   (p ⇔ q ≡ (p ∧ q) ∨ (¬p ∧ ¬q))\n≡ (¬p ∧ q) ∨ (p ∧ ¬q) — trùng với vế trên (giao hoán ∨).'}
+LAW={'1.1':'giao hoán','1.2':'kết hợp','1.3':'phân phối','1.4':'De Morgan'}
+def ch1(iid,lab,ref,t):
+    G=None
+    # (kind, f, g, deriv key)
+    table={('1.1','a'):('eq',O(p,q),O(q,p),None),('1.1','b'):('eq',A(p,q),A(q,p),None),('1.2','a'):('eq',O(O(p,q),r),O(p,O(q,r)),None),('1.2','b'):('eq',A(A(p,q),r),A(p,A(q,r)),None),
+      ('1.3','a'):('eq',O(p,A(q,r)),A(O(p,q),O(p,r)),None),('1.3','b'):('eq',A(p,O(q,r)),O(A(p,q),A(p,r)),None),('1.4','a'):('eq',N(A(p,q)),O(N(p),N(q)),None),('1.4','b'):('eq',N(O(p,q)),A(N(p),N(q)),None),
+      ('1.5','a'):('taut',I(A(p,q),p),None,'F1'),('1.5','b'):('taut',I(p,O(p,q)),None,'F2'),('1.5','c'):('taut',I(N(p),I(p,q)),None,'F3'),
+      ('1.6','a'):('taut',I(A(p,q),I(p,q)),None,'F4'),('1.6','b'):('taut',I(N(I(p,q)),p),None,'F5'),('1.6','c'):('taut',I(N(I(p,q)),N(q)),None,'F6'),
+      ('1.7','a'):('taut',I(A(N(p),O(p,q)),q),None,'F7'),('1.7','b'):('taut',I(A(I(p,q),I(q,r)),I(p,r)),None,'F8'),
+      ('1.8','a'):('taut',I(A(p,I(p,q)),q),None,'F9'),('1.8','b'):('taut',I(A(A(O(p,q),I(p,r)),I(q,r)),r),None,'F10'),
+      ('1.9','a'):('eq',E(p,q),O(A(p,q),A(N(p),N(q))),'E1'),('1.9','b'):('eq',I(p,q),I(N(q),N(p)),'E2'),
+      ('1.10','a'):('eq',N(X(p,q)),E(p,q),'E3'),('1.10','b'):('eq',N(E(p,q)),E(N(p),q),'E4'),
+      ('1.11','a'):('taut',I(A(p,q),p),None,'F1'),('1.11','b'):('taut',I(p,O(p,q)),None,'F2'),('1.12','a'):('taut',I(N(p),I(p,q)),None,'F3'),('1.12','b'):('taut',I(A(p,q),I(p,q)),None,'F4'),
+      ('1.13','a'):('taut',I(N(I(p,q)),p),None,'F5'),('1.13','b'):('taut',I(N(I(p,q)),N(q)),None,'F6'),('1.14','a'):('taut',I(A(N(p),O(p,q)),q),None,'F7'),('1.14','b'):('taut',I(A(I(p,q),I(q,r)),I(p,r)),None,'F8'),
+      ('1.15','a'):('taut',I(A(p,I(p,q)),q),None,'F9'),('1.15','b'):('taut',I(A(A(O(p,q),I(p,r)),I(q,r)),r),None,'F10'),('1.16','a'):('eq',E(p,q),O(A(p,q),A(N(p),N(q))),'E1'),('1.16','b'):('eq',I(p,q),I(N(q),N(p)),'E2'),
+      ('1.17','a'):('eq',N(X(p,q)),E(p,q),'E3'),('1.17','b'):('eq',N(E(p,q)),E(N(p),q),'E4')}
+    key=(iid,lab)
+    if key not in table: return False
+    kind,f,g,dk=table[key]
+    nb='không dùng bảng' if iid in ('1.11','1.12','1.13','1.14','1.15','1.16','1.17') else 'bảng chân lý'
+    if kind=='taut': assert LT.kind(f)=='taut',(key,LT.show(f))
+    else: assert LT.equiv(f,g),(key,LT.show(f),LT.show(g))
+    stem=(f'Dùng bảng chân lý để chứng minh {LT.show(f)} là hằng đúng.' if kind=='taut' else f'Dùng bảng chân lý để chứng minh {LT.show(f)} ≡ {LT.show(g)}.') if nb=='bảng chân lý' else (f'Không dùng bảng chân lý, chứng minh {LT.show(f)} là hằng đúng.' if kind=='taut' else f'Không dùng bảng chân lý, chứng minh {LT.show(f)} ≡ {LT.show(g)}.')
+    if nb=='bảng chân lý': sol=(TTtxt(f)+'\nCột cuối toàn Đ ⇒ hằng đúng. ∎') if kind=='taut' else (TTeq(f,g)+'\nHai cột cuối giống hệt nhau trên mọi dòng ⇒ tương đương. ∎')
+    else: sol=DER[dk]+' ∎'
+    if iid in LAW and nb=='bảng chân lý': sol=f'Luật {LAW[iid]}. '+sol
+    add_rec(mod='m01',src=ref,q=stem,ans=None,wrong=[],sol=sol,level=1 if nb=='bảng chân lý' else 2,topic='Chứng minh logic')
+    if kind=='taut' and nb=='bảng chân lý':
+        vs,rows=LT.table(f)
+        add_rec(mod='m01',src=ref+' (chuyển thành trắc nghiệm)',q=f'Công thức {LT.show(f)} thuộc loại nào?',ans='Hằng đúng (tautology)',wrong=['Mâu thuẫn (hằng sai)','Thỏa được nhưng không hằng đúng','Không thể kết luận nếu chưa biết giá trị các biến'],sol=f'Lập bảng chân trị {len(rows)} dòng: mọi dòng cho Đ ⇒ hằng đúng.\n'+TTtxt(f),level=1,topic='Phân loại công thức')
+    return True
+from recstore import add as add_rec
+def ch1_sets(iid,lab,ref,t):
+    S={('1.18','a'):('(B − A) ∪ (C − A) = (B ∪ C) − A','x ∈ (B − A) ∪ (C − A) ⇔ (x ∈ B ∧ x ∉ A) ∨ (x ∈ C ∧ x ∉ A) ⇔ (x ∈ B ∨ x ∈ C) ∧ x ∉ A   (phân phối)\n⇔ x ∈ B ∪ C ∧ x ∉ A ⇔ x ∈ (B ∪ C) − A. ∎'),
+       ('1.18','b'):('A − B = A ∩ Bᶜ','x ∈ A − B ⇔ x ∈ A ∧ x ∉ B ⇔ x ∈ A ∧ x ∈ Bᶜ ⇔ x ∈ A ∩ Bᶜ. ∎'),
+       ('1.19','a'):('A ∪ (B ∪ C) = (A ∪ B) ∪ C','x ∈ A ∪ (B ∪ C) ⇔ x ∈ A ∨ (x ∈ B ∨ x ∈ C) ⇔ (x ∈ A ∨ x ∈ B) ∨ x ∈ C   (kết hợp của ∨) ⇔ x ∈ (A ∪ B) ∪ C. ∎'),
+       ('1.19','b'):('(A − B) − C = (A − B) − (B − C)','⚠ Phát biểu trong đề gốc KHÔNG đúng với mọi tập hợp. Phản ví dụ: A = {1}, B = ∅, C = {1}. Khi đó (A − B) − C = {1} − {1} = ∅ nhưng (A − B) − (B − C) = {1} − ∅ = {1}.\nĐẳng thức đúng liên quan: (A − B) − (B − C) = A − B (vì B − C ⊆ B và A − B không chứa phần tử nào của B), còn (A − B) − C = A − (B ∪ C).'),
+       ('1.20','b'):('A − B = A ∩ Bᶜ','x ∈ A − B ⇔ x ∈ A ∧ x ∉ B ⇔ x ∈ A ∩ Bᶜ. ∎')}
+    if (iid,lab) in S:
+        a,sol=S[(iid,lab)]
+        if (iid,lab)==('1.19','b') or (iid=='1.20' and 'C' in t and lab=='b' and '(A − B)− C' in t):
+            a,sol=S[('1.19','b')]
+            add_rec(mod='m03',src=ref+' ⚠ đề gốc có lỗi',q=f'Chứng minh rằng {a} (kiểm tra xem phát biểu có đúng không).',ans=None,wrong=[],sol=sol,level=3,topic='Chứng minh tập hợp'); return True
+        add_rec(mod='m03',src=ref,q=f'Cho A, B, C là các tập hợp. Chứng minh rằng {a}.',ans=None,wrong=[],sol=sol,level=2,topic='Chứng minh tập hợp'); return True
+    m=re.search(r'\(A ∩ B\) ∪ A ∩ B',t)
+    if iid=='1.18' and '= A' in t and lab=='b':
+        add_rec(mod='m03',src=ref,q='Cho A, B là các tập hợp. Chứng minh rằng (A ∩ B) ∪ (A ∩ Bᶜ) = A.',ans=None,wrong=[],sol='(A ∩ B) ∪ (A ∩ Bᶜ) = A ∩ (B ∪ Bᶜ)   (phân phối)\n= A ∩ U = A. ∎',level=2,topic='Chứng minh tập hợp'); return True
+    return False
+
+# ================= CHƯƠNG 3: LIỆT KÊ =================
+def _nums(s): return [int(x) for x in re.findall(r'\d+',s)]
+def next_perm(a):
+    a=list(a); i=len(a)-2
+    while i>=0 and a[i]>a[i+1]: i-=1
+    if i<0: return None
+    j=len(a)-1
+    while a[j]<a[i]: j-=1
+    a[i],a[j]=a[j],a[i]; a[i+1:]=reversed(a[i+1:]); return tuple(a)
+def next_comb(c,n):
+    k=len(c); a=list(c); i=k-1
+    while i>=0 and a[i]==n-k+i+1: i-=1
+    if i<0: return None
+    a[i]+=1
+    for j in range(i+1,k): a[j]=a[j-1]+1
+    return tuple(a)
+def next_bin(b):
+    a=list(b); i=len(a)-1
+    while i>=0 and a[i]==1: a[i]=0; i-=1
+    if i<0: return None
+    a[i]=1; return tuple(a)
+def chain(f,x,k,*e):
+    out=[]
+    for _ in range(k):
+        x=f(x,*e)
+        if x is None: break
+        out.append(x)
+    return out
+def LT_(ts): return ' → '.join(T(t) for t in ts)
+ALG={
+ 'sinh_perm':('Thuật toán sinh hoán vị kế tiếp theo thứ tự từ điển','Hoán vị đầu: (1,2,…,n); hoán vị cuối: (n,…,2,1).\nTừ p = (p₁,…,p_n):\n1) tìm i lớn nhất sao cho p[i] < p[i+1]; nếu không có i thì p là hoán vị cuối ⇒ dừng.\n2) tìm j lớn nhất sao cho p[j] > p[i].\n3) đổi chỗ p[i] và p[j].\n4) đảo ngược đoạn p[i+1..n].\nKết quả là hoán vị kế tiếp. Độ phức tạp mỗi lần sinh: O(n).','perm_gen'),
+ 'sinh_comb':('Thuật toán sinh tổ hợp chập k kế tiếp theo thứ tự từ điển','Tổ hợp đầu (1,2,…,k); tổ hợp cuối (n−k+1,…,n).\nTừ c = (c₁<…<c_k):\n1) tìm i lớn nhất sao cho c[i] ≠ n−k+i; nếu không có thì c là tổ hợp cuối ⇒ dừng.\n2) c[i] = c[i] + 1.\n3) với j = i+1..k: c[j] = c[j−1] + 1.\nMỗi lần sinh O(k).','comb_gen'),
+ 'sinh_bin':('Thuật toán sinh xâu nhị phân kế tiếp theo thứ tự từ điển','Xâu đầu 00…0; xâu cuối 11…1.\nTừ x = (x₁,…,x_n): tìm i lớn nhất sao cho x[i] = 0; nếu không có thì x là xâu cuối ⇒ dừng. Đặt x[i] = 1 và mọi x[j] = 0 với j > i. (Chính là phép cộng 1 trong hệ nhị phân.)','bin_gen'),
+ 'bt_perm':('Thuật toán quay lui liệt kê hoán vị của 1..n','Try(i): với mỗi v = 1..n chưa dùng (used[v] = false): gán x[i] = v, used[v] = true; nếu i = n thì in x, ngược lại gọi Try(i+1); sau đó trả lại used[v] = false. Gọi Try(1).\nKiểm nghiệm n = 3: thứ tự in 123, 132, 213, 231, 312, 321 (thứ tự từ điển).','perm_bt'),
+ 'bt_comb':('Thuật toán quay lui liệt kê tổ hợp chập k của 1..n','Try(i): với v = x[i−1]+1 … n−k+i: gán x[i] = v; nếu i = k thì in x, ngược lại Try(i+1). Đặt x[0] = 0 và gọi Try(1). Cận trên n−k+i bảo đảm còn đủ phần tử cho các vị trí sau.','comb_bt'),
+ 'bt_bin':('Thuật toán quay lui liệt kê xâu nhị phân độ dài n','Try(i): với v = 0, 1: gán x[i] = v; nếu i = n thì in x, ngược lại gọi Try(i+1). Gọi Try(1). Có 2ⁿ xâu; kiểm nghiệm n = 3: 000, 001, 010, 011, 100, 101, 110, 111.','bin_bt')}
+def alg_solution(key,extra=''):
+    title,text,code=ALG[key]
+    return f'{title}.\n{text}\n\nMã C/C++:\n{CPP[code]}'+extra
+def ch3(iid,lab,ref,t):
+    tt=t
+    m=re.search(r'sinh hoán vị theo thứ tự từ điển,? (?:tìm|liệt kê) (\d+) hoán vị (?:liền kề )?tiếp theo của (?:hoán vị )?\(?([\d,\s]+)\)?',tt)
+    if m and 'Trình bày' not in tt:
+        k=int(m.group(1)); digs=m.group(2); x=tuple(int(c) for c in digs) if ',' not in digs and len(digs.strip())>=9 else tuple(_nums(digs))
+        ch=chain(next_perm,x,k); n=len(x)
+        wr=[LT_(list(reversed(ch))),LT_([tuple(sorted(y)) for y in ch]),LT_(ch[1:]+[x])]
+        add_rec(mod='m10',src=ref,q=f'Cho tập A = {{1,…,{n}}}. Dùng phương pháp sinh hoán vị theo thứ tự từ điển, {k} hoán vị liền kề tiếp theo của {T(x)} là:',ans=LT_(ch),wrong=wr,sol='Áp dụng lần lượt thuật toán hoán vị kế tiếp:\n'+LT_([x]+ch),level=3,topic='Hoán vị kế tiếp'); return True
+    m=re.search(r'sinh tổ hợp chập k .*?(?:tạo|liệt kê)(?: ra)? (\d+) tổ hợp chập (\d+) liền kề tiếp theo của (?:tổ hợp )?\(?([\d,\s]+)\)?',tt)
+    if m and 'Trình bày' not in tt.split('Cho tập')[0]:
+        k=int(m.group(1)); c=tuple(_nums(m.group(3))); n=10 if '10}' in tt or '10 }' in tt or max(c)==10 else 9
+        ch=chain(next_comb,c,k,n)
+        add_rec(mod='m10',src=ref,q=f'Cho tập A = {{1,…,{n}}}. Sinh các tổ hợp chập {len(c)} theo thứ tự từ điển: {k} tổ hợp liền kề tiếp theo của {T(c)} là:',ans=LT_(ch),wrong=[LT_(list(reversed(ch))),LT_(ch[1:]+[c]),LT_([tuple(sorted(y[:-1]+(y[-1]-1,))) for y in ch])],sol='Áp dụng lần lượt thuật toán tổ hợp kế tiếp:\n'+LT_([c]+ch),level=3,topic='Tổ hợp kế tiếp'); return True
+    m=re.search(r'xâu nhị phân X = \{([\d,\s]+)\}.*?tìm (\d+) xâu',tt)
+    if m:
+        x=tuple(_nums(m.group(1))); k=int(m.group(2)); ch=chain(next_bin,x,k)
+        add_rec(mod='m10',src=ref,q=f'Cho xâu nhị phân X = {T(x)}. Dùng phương pháp sinh xâu nhị phân theo thứ tự từ điển, {k} xâu liền kề tiếp theo của X là:',ans=LT_(ch),wrong=[LT_(list(reversed(ch))),LT_([tuple(1-b for b in y) for y in ch]),LT_(ch[1:]+[x])],sol='Xâu kế tiếp = xâu hiện tại + 1 (nhị phân):\n'+LT_([x]+ch),level=2,topic='Xâu nhị phân kế tiếp'); return True
+    # thuật toán / mã
+    if re.search(r'Trình bày thuật toán sinh theo thứ tự từ điển hoán vị kế tiếp',tt) or re.search(r'sinh.*hoán vị.*C/\+\+|Áp dụng thuật toán tại Mục a, viết chương trình.*hoán vị',tt) and 'quay lui' not in tt:
+        add_rec(mod='m10',src=ref,q=tt,ans=None,wrong=[],sol=alg_solution('sinh_perm'),level=3,topic='Thuật toán sinh'); return True
+    if 'quay lui' in tt and 'hoán vị' in tt or (iid=='3.3' and lab.strip('()')=='b'):
+        add_rec(mod='m11',src=ref,q=tt,ans=None,wrong=[],sol=alg_solution('bt_perm'),level=3,topic='Quay lui'); return True
+    if 'quay lui' in tt and 'tổ hợp' in tt or (iid=='3.6' and lab.strip('()')=='b') or (iid=='3.13' and lab.strip('()')=='a'):
+        add_rec(mod='m11',src=ref,q=tt,ans=None,wrong=[],sol=alg_solution('bt_comb'),level=3,topic='Quay lui'); return True
+    if 'quay lui' in tt and 'xâu nhị phân' in tt or (iid=='3.9' and lab.strip('()')=='b'):
+        add_rec(mod='m11',src=ref,q=tt,ans=None,wrong=[],sol=alg_solution('bt_bin'),level=2,topic='Quay lui'); return True
+    if re.search(r'tổ hợp chập k',tt) or (iid=='3.4' and lab.strip('()')=='b'):
+        add_rec(mod='m10',src=ref,q=tt,ans=None,wrong=[],sol=alg_solution('sinh_comb'),level=3,topic='Thuật toán sinh'); return True
+    if re.search(r'xâu nhị phân',tt) or (iid=='3.7'):
+        add_rec(mod='m10',src=ref,q=tt,ans=None,wrong=[],sol=alg_solution('sinh_bin'),level=2,topic='Thuật toán sinh'); return True
+    return False

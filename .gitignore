@@ -2,3 +2,5 @@ node_modules/
 __pycache__/
 *.pyc
 .DS_Store
+Discrete-Math/build/orig/pages/
+Discrete-Math/build/orig/nh_raw.json

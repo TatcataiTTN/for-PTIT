@@ -3,20 +3,21 @@
 var root=document.getElementById('bank');if(!root)return;
 var D=JSON.parse(document.getElementById('bank-data').textContent);
 var KEY='bank:'+D.module;
-var state={ans:{},ess:{},level:'all',topic:'all',tab:'mcq',page:0,onlyWrong:false,order:D.items.map(function(_,i){return i}),size:15};
+var state={ans:{},ess:{},level:'all',topic:'all',origin:'all',tab:'mcq',page:0,onlyWrong:false,order:D.items.map(function(_,i){return i}),size:15};
 try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s){state.ans=s.ans||{};state.ess=s.ess||{}}}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({ans:state.ans,ess:state.ess}))}catch(e){}}
 var topics=[];D.items.forEach(function(i){if(topics.indexOf(i.topic)<0)topics.push(i.topic)});
 function el(t,c,txt){var e=document.createElement(t);if(c)e.className=c;if(txt!==undefined)e.textContent=txt;return e}
 function stats(){var n=D.items.length,a=0,c=0;D.items.forEach(function(it){var v=state.ans[it.id];if(v!==undefined){a++;if(v===it.correct)c++}});return {n:n,a:a,c:c}}
 function filtered(){return state.order.map(function(i){return D.items[i]}).filter(function(it){
-  if(state.level!=='all'&&String(it.level)!==state.level)return false;if(state.topic!=='all'&&it.topic!==state.topic)return false;
+  if(state.origin!=='all'&&it.origin!==state.origin)return false;if(state.level!=='all'&&String(it.level)!==state.level)return false;if(state.topic!=='all'&&it.topic!==state.topic)return false;
   if(state.onlyWrong){var v=state.ans[it.id];return v!==undefined&&v!==it.correct}return true})}
 function render(){
   root.innerHTML='';var st=stats();
   var top=el('div','sim');top.innerHTML='<div class="simh">Bảng điều khiển</div>';
   var row=el('div','row');
   function sel(lbl,opts,val,cb){var l=el('label');l.appendChild(document.createTextNode(lbl+' '));var s=el('select');opts.forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];if(o[0]===val)op.selected=true;s.appendChild(op)});s.onchange=function(){cb(s.value)};l.appendChild(s);row.appendChild(l)}
+  sel('Nguồn:',[['all','Tất cả'],['goc','Câu gốc từ tài liệu ('+D.items.filter(function(i){return i.origin==='goc'}).length+')'],['bo_sung','Bổ sung ('+D.items.filter(function(i){return i.origin!=='goc'}).length+')']],state.origin,function(v){state.origin=v;state.page=0;render()});
   sel('Mức độ:',[['all','Tất cả'],['1','Cơ bản (1)'],['2','Vừa (2)'],['3','Khó (3)']],state.level,function(v){state.level=v;state.page=0;render()});
   sel('Chủ đề:',[['all','Tất cả ('+D.items.length+')']].concat(topics.map(function(t){return [t,t+' ('+D.items.filter(function(i){return i.topic===t}).length+')']})),state.topic,function(v){state.topic=v;state.page=0;render()});
   var lw=el('label');var cb=el('input');cb.type='checkbox';cb.checked=state.onlyWrong;cb.onchange=function(){state.onlyWrong=cb.checked;state.page=0;render()};lw.appendChild(cb);lw.appendChild(document.createTextNode(' chỉ câu đã làm sai'));row.appendChild(lw);
@@ -36,7 +37,7 @@ function renderMcq(){
   root.appendChild(el('p','lead','Hiển thị '+list.length+' câu — trang '+(state.page+1)+'/'+pages));
   list.slice(state.page*state.size,(state.page+1)*state.size).forEach(function(it){
     var box=el('div','qitem');box.id=it.id;
-    var head=el('div');head.innerHTML='<span class="tag">'+it.id+'</span><span class="tag">'+it.topic+'</span><span class="tag'+(it.level===3?' exam':'')+'">mức '+it.level+'</span>';box.appendChild(head);
+    var head=el('div');head.innerHTML='<span class="tag">'+it.id+'</span><span class="tag">Môn: TRR1</span><span class="tag">'+it.topic+'</span><span class="tag'+(it.level===3?' exam':'')+'">mức '+it.level+'</span>';box.appendChild(head);var sr=el('div',null,(it.origin==='goc'?'📎 Câu gốc · ':'➕ ')+it.src);sr.style.fontSize='.78rem';sr.style.color='var(--muted)';box.appendChild(sr);
     var t=el('div','qtxt');t.textContent=it.q;t.style.marginTop='6px';t.style.fontWeight='600';box.appendChild(t);
     var ex=el('div','explain');var chosen=state.ans[it.id];
     function showResult(c){
@@ -56,10 +57,10 @@ function renderMcq(){
 }
 function refreshStats(){var st=stats();var p=root.querySelector('.quiz-score');if(p)p.textContent='Tiến độ: đã làm '+st.a+'/'+st.n+' câu · đúng '+st.c+' · sai '+(st.a-st.c)+(st.a?' · tỉ lệ đúng '+Math.round(100*st.c/st.a)+'%':'')}
 function renderEss(){
-  var list=D.essays.filter(function(e){return (state.level==='all'||String(e.level)===state.level)&&(state.topic==='all'||e.topic===state.topic)});
+  var list=D.essays.filter(function(e){return (state.origin==='all'||e.origin===state.origin)&&(state.level==='all'||String(e.level)===state.level)&&(state.topic==='all'||e.topic===state.topic)});
   root.appendChild(el('p','lead','Tự luận: hãy tự làm nháp trước, rồi bấm "Xem lời giải" để đối chiếu. Đánh dấu bài đã làm được để theo dõi tiến độ.'));
   list.forEach(function(e){
-    var box=el('div','qitem');var head=el('div');head.innerHTML='<span class="tag">'+e.id+'</span><span class="tag">'+e.topic+'</span><span class="tag'+(e.level===3?' exam':'')+'">mức '+e.level+'</span>';box.appendChild(head);
+    var box=el('div','qitem');var head=el('div');head.innerHTML='<span class="tag">'+e.id+'</span><span class="tag">Môn: TRR1</span><span class="tag">'+e.topic+'</span><span class="tag'+(e.level===3?' exam':'')+'">mức '+e.level+'</span>';box.appendChild(head);var sr=el('div',null,(e.origin==='goc'?'📎 Câu gốc · ':'➕ ')+e.src);sr.style.fontSize='.78rem';sr.style.color='var(--muted)';box.appendChild(sr);
     var t=el('div','qtxt');t.textContent=e.q;t.style.fontWeight='600';t.style.marginTop='6px';box.appendChild(t);
     var sol=el('div','explain');sol.textContent=e.sol;box.appendChild(sol);
     var sb=el('button','btn alt','👁 Xem lời giải');sb.type='button';sb.onclick=function(){sol.classList.toggle('show');sb.textContent=sol.classList.contains('show')?'🙈 Ẩn lời giải':'👁 Xem lời giải'};

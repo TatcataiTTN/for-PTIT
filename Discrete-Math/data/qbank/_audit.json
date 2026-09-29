@@ -1,0 +1,197 @@
+{
+ "m01": {
+  "n": 100,
+  "n_goc": 11,
+  "n_bo_sung": 89,
+  "essays": 36,
+  "essays_goc": 36,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.101
+ },
+ "m02": {
+  "n": 100,
+  "n_goc": 0,
+  "n_bo_sung": 100,
+  "essays": 7,
+  "essays_goc": 0,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.105
+ },
+ "m03": {
+  "n": 100,
+  "n_goc": 1,
+  "n_bo_sung": 99,
+  "essays": 12,
+  "essays_goc": 8,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.125
+ },
+ "m04": {
+  "n": 100,
+  "n_goc": 76,
+  "n_bo_sung": 24,
+  "essays": 9,
+  "essays_goc": 1,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.032
+ },
+ "m05": {
+  "n": 100,
+  "n_goc": 87,
+  "n_bo_sung": 13,
+  "essays": 8,
+  "essays_goc": 0,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.0
+ },
+ "m06": {
+  "n": 100,
+  "n_goc": 95,
+  "n_bo_sung": 5,
+  "essays": 12,
+  "essays_goc": 10,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.025
+ },
+ "m07": {
+  "n": 100,
+  "n_goc": 44,
+  "n_bo_sung": 56,
+  "essays": 6,
+  "essays_goc": 0,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.182
+ },
+ "m08": {
+  "n": 131,
+  "n_goc": 131,
+  "n_bo_sung": 0,
+  "essays": 11,
+  "essays_goc": 3,
+  "pos": {
+   "A": 33,
+   "B": 33,
+   "C": 33,
+   "D": 32
+  },
+  "chi2": 0.02,
+  "longest": 0.087
+ },
+ "m09": {
+  "n": 100,
+  "n_goc": 0,
+  "n_bo_sung": 100,
+  "essays": 8,
+  "essays_goc": 0,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.026
+ },
+ "m10": {
+  "n": 158,
+  "n_goc": 158,
+  "n_bo_sung": 0,
+  "essays": 12,
+  "essays_goc": 12,
+  "pos": {
+   "A": 40,
+   "B": 40,
+   "C": 39,
+   "D": 39
+  },
+  "chi2": 0.03,
+  "longest": 0.0
+ },
+ "m11": {
+  "n": 100,
+  "n_goc": 0,
+  "n_bo_sung": 100,
+  "essays": 12,
+  "essays_goc": 6,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.108
+ },
+ "m12": {
+  "n": 100,
+  "n_goc": 83,
+  "n_bo_sung": 17,
+  "essays": 32,
+  "essays_goc": 32,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.071
+ },
+ "m13": {
+  "n": 100,
+  "n_goc": 40,
+  "n_bo_sung": 60,
+  "essays": 12,
+  "essays_goc": 4,
+  "pos": {
+   "A": 25,
+   "B": 25,
+   "C": 25,
+   "D": 25
+  },
+  "chi2": 0.0,
+  "longest": 0.267
+ }
+}
