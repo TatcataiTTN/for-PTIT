@@ -1,10 +1,10 @@
 {
  "m01": {
   "n": 100,
-  "n_goc": 11,
-  "n_bo_sung": 89,
-  "essays": 36,
-  "essays_goc": 36,
+  "n_goc": 12,
+  "n_bo_sung": 88,
+  "essays": 37,
+  "essays_goc": 37,
   "pos": {
    "A": 25,
    "B": 25,
@@ -12,7 +12,7 @@
    "D": 25
   },
   "chi2": 0.0,
-  "longest": 0.101
+  "longest": 0.087
  },
  "m02": {
   "n": 100,
@@ -31,10 +31,10 @@
  },
  "m03": {
   "n": 100,
-  "n_goc": 1,
-  "n_bo_sung": 99,
+  "n_goc": 4,
+  "n_bo_sung": 96,
   "essays": 12,
-  "essays_goc": 8,
+  "essays_goc": 10,
   "pos": {
    "A": 25,
    "B": 25,
@@ -42,14 +42,14 @@
    "D": 25
   },
   "chi2": 0.0,
-  "longest": 0.125
+  "longest": 0.123
  },
  "m04": {
   "n": 100,
-  "n_goc": 76,
-  "n_bo_sung": 24,
-  "essays": 9,
-  "essays_goc": 1,
+  "n_goc": 78,
+  "n_bo_sung": 22,
+  "essays": 10,
+  "essays_goc": 2,
   "pos": {
    "A": 25,
    "B": 25,
@@ -57,12 +57,12 @@
    "D": 25
   },
   "chi2": 0.0,
-  "longest": 0.032
+  "longest": 0.034
  },
  "m05": {
   "n": 100,
-  "n_goc": 87,
-  "n_bo_sung": 13,
+  "n_goc": 90,
+  "n_bo_sung": 10,
   "essays": 8,
   "essays_goc": 0,
   "pos": {
@@ -117,12 +117,12 @@
    "D": 32
   },
   "chi2": 0.02,
-  "longest": 0.087
+  "longest": 0.081
  },
  "m09": {
   "n": 100,
-  "n_goc": 0,
-  "n_bo_sung": 100,
+  "n_goc": 2,
+  "n_bo_sung": 98,
   "essays": 8,
   "essays_goc": 0,
   "pos": {
@@ -132,14 +132,14 @@
    "D": 25
   },
   "chi2": 0.0,
-  "longest": 0.026
+  "longest": 0.028
  },
  "m10": {
   "n": 158,
   "n_goc": 158,
   "n_bo_sung": 0,
-  "essays": 12,
-  "essays_goc": 12,
+  "essays": 14,
+  "essays_goc": 14,
   "pos": {
    "A": 40,
    "B": 40,
@@ -154,7 +154,7 @@
   "n_goc": 0,
   "n_bo_sung": 100,
   "essays": 12,
-  "essays_goc": 6,
+  "essays_goc": 8,
   "pos": {
    "A": 25,
    "B": 25,
@@ -166,10 +166,10 @@
  },
  "m12": {
   "n": 100,
-  "n_goc": 83,
-  "n_bo_sung": 17,
-  "essays": 32,
-  "essays_goc": 32,
+  "n_goc": 85,
+  "n_bo_sung": 15,
+  "essays": 34,
+  "essays_goc": 34,
   "pos": {
    "A": 25,
    "B": 25,
@@ -177,7 +177,7 @@
    "D": 25
   },
   "chi2": 0.0,
-  "longest": 0.071
+  "longest": 0.062
  },
  "m13": {
   "n": 100,
