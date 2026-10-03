@@ -19,7 +19,7 @@ def load_mau_de():
             if key in seen: continue
             seen.add(key)
             out[KIND2MOD[kind]].append(dict(q=fm(it['stem']),opts=[fm(o) for o in it['opts']],correct=it['ans'],explain=fm(it['expl']),level=LEVEL[kind],topic=TOPIC[kind],
-              src=f'Đề ôn trắc nghiệm TRR1 (Mẫu đề 2) – đề {it["de"]}, câu {it["n"]}',origin='goc',mon='TRR1'))
+              src=f'Đề ôn trắc nghiệm TRR1 (Mẫu đề 2) – đề {it["de"]}, câu {it["n"]}'+(' · '+it['rep'] if it.get('rep') else ''),origin='goc',mon='TRR1'))
     return out
 def rec_to_items(recs):
     mcq=collections.defaultdict(list); ess=collections.defaultdict(list)
