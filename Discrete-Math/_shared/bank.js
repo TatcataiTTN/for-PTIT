@@ -21,7 +21,7 @@ function render(){
   var row=el('div','row');
   function sel(lbl,opts,val,cb){var l=el('label');l.appendChild(document.createTextNode(lbl+' '));var s=el('select');opts.forEach(function(o){var op=el('option',null,o[1]);op.value=o[0];if(o[0]===val)op.selected=true;s.appendChild(op)});s.onchange=function(){cb(s.value)};l.appendChild(s);row.appendChild(l)}
   sel('Hiển thị:',[['all','Tất cả'],['todo','Chưa làm'],['wrong','Đã làm sai'],['due','Đến hạn ôn lại']],state.view,function(v){state.view=v;state.page=0;render()});
-  sel('Nguồn:',[['all','Tất cả'],['goc','Câu gốc từ tài liệu ('+D.items.filter(function(i){return i.origin==='goc'}).length+')'],['bo_sung','Bổ sung ('+D.items.filter(function(i){return i.origin!=='goc'}).length+')']],state.origin,function(v){state.origin=v;state.page=0;render()});
+  sel('Nguồn:',[['all','Tất cả'],['goc','Câu gốc từ tài liệu ('+D.items.filter(function(i){return i.origin==='goc'}).length+')'],['tham_khao','Tham khảo ngoài PTIT ('+D.items.filter(function(i){return i.origin==='tham_khao'}).length+')'],['bo_sung','Bổ sung ('+D.items.filter(function(i){return i.origin==='bo_sung'}).length+')']],state.origin,function(v){state.origin=v;state.page=0;render()});
   sel('Mức độ:',[['all','Tất cả'],['1','Cơ bản (1)'],['2','Vừa (2)'],['3','Khó (3)']],state.level,function(v){state.level=v;state.page=0;render()});
   sel('Chủ đề:',[['all','Tất cả ('+D.items.length+')']].concat(topics.map(function(t){return [t,t+' ('+D.items.filter(function(i){return i.topic===t}).length+')']})),state.topic,function(v){state.topic=v;state.page=0;render()});
   top.appendChild(row);
@@ -42,7 +42,7 @@ function renderMcq(){
   list.slice(state.page*state.size,(state.page+1)*state.size).forEach(function(it){
     var box=el('div','qitem');box.id=it.id;
     var head=el('div');head.innerHTML='<span class="tag">'+it.id+'</span><span class="tag">Môn: TRR1</span><span class="tag">'+it.topic+'</span><span class="tag'+(it.level===3?' exam':'')+'">mức '+it.level+'</span>';box.appendChild(head);
-    var sr=el('div',null,(it.origin==='goc'?'📎 Câu gốc · ':'➕ ')+it.src);sr.style.fontSize='.78rem';sr.style.color='var(--muted)';box.appendChild(sr);
+    var sr=el('div',null,(it.origin==='goc'?'📎 Câu gốc · ':(it.origin==='tham_khao'?'📚 Tham khảo ngoài PTIT · ':'➕ '))+it.src);sr.style.fontSize='.78rem';sr.style.color='var(--muted)';box.appendChild(sr);
     var t=el('div','qtxt');t.textContent=it.q;t.style.marginTop='6px';t.style.fontWeight='600';box.appendChild(t);
     var ex=el('div','explain'),r0=rec(it.id);
     function showResult(c){
@@ -67,7 +67,7 @@ function renderEss(){
   var done=D.essays.filter(function(e){return st.ess[e.id]}).length;root.appendChild(el('div','quiz-score','Đã làm được '+done+'/'+D.essays.length+' bài tự luận'));
   list.forEach(function(e){
     var box=el('div','qitem');var head=el('div');head.innerHTML='<span class="tag">'+e.id+'</span><span class="tag">Môn: TRR1</span><span class="tag">'+e.topic+'</span><span class="tag'+(e.level===3?' exam':'')+'">mức '+e.level+'</span>';box.appendChild(head);
-    var sr=el('div',null,(e.origin==='goc'?'📎 Câu gốc · ':'➕ ')+e.src);sr.style.fontSize='.78rem';sr.style.color='var(--muted)';box.appendChild(sr);
+    var sr=el('div',null,(e.origin==='goc'?'📎 Câu gốc · ':(e.origin==='tham_khao'?'📚 Tham khảo ngoài PTIT · ':'➕ '))+e.src);sr.style.fontSize='.78rem';sr.style.color='var(--muted)';box.appendChild(sr);
     var t=el('div','qtxt');t.textContent=e.q;t.style.fontWeight='600';t.style.marginTop='6px';box.appendChild(t);
     var sol=el('div','explain');sol.textContent=e.sol;box.appendChild(sol);
     var sb=el('button','btn alt','👁 Xem lời giải');sb.type='button';sb.onclick=function(){sol.classList.toggle('show');sb.textContent=sol.classList.contains('show')?'🙈 Ẩn lời giải':'👁 Xem lời giải'};

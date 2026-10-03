@@ -16,8 +16,8 @@
  },
  "m02": {
   "n": 100,
-  "n_goc": 0,
-  "n_bo_sung": 100,
+  "n_goc": 9,
+  "n_bo_sung": 91,
   "essays": 7,
   "essays_goc": 0,
   "pos": {
@@ -27,7 +27,7 @@
    "D": 25
   },
   "chi2": 0.0,
-  "longest": 0.105
+  "longest": 0.121
  },
  "m03": {
   "n": 100,
@@ -151,8 +151,8 @@
  },
  "m11": {
   "n": 100,
-  "n_goc": 0,
-  "n_bo_sung": 100,
+  "n_goc": 18,
+  "n_bo_sung": 82,
   "essays": 13,
   "essays_goc": 13,
   "pos": {
@@ -162,7 +162,7 @@
    "D": 25
   },
   "chi2": 0.0,
-  "longest": 0.108
+  "longest": 0.098
  },
  "m12": {
   "n": 106,

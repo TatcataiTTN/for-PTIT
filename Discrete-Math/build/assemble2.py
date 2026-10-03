@@ -1,7 +1,7 @@
 import sys, os, json, random, collections, importlib, hashlib
 sys.path.insert(0,os.path.join(os.path.dirname(__file__),'orig'))
 from qcore import audit, fm
-import orig_nh, orig_book, orig_intro, orig_exams
+import orig_nh, orig_book, orig_intro, orig_exams, orig_more
 from recstore import RECS
 MODS=[('m01','Logic mệnh đề'),('m02','Vị từ và lượng từ'),('m03','Tập hợp và độ phức tạp'),('m04','Nguyên lý đếm cơ bản'),('m05','Hoán vị, tổ hợp, nghiệm nguyên'),('m06','Dirichlet và bài toán tồn tại'),('m07','Lập hệ thức truy hồi'),('m08','Giải hệ thức truy hồi'),('m09','Hàm sinh'),('m10','Phương pháp sinh'),('m11','Quay lui'),('m12','Duyệt toàn bộ và nhánh cận (cái túi)'),('m13','Nhánh cận người du lịch')]
 KIND2MOD={'logic':'m01','pigeon_exam':'m06','pigeon_ball':'m06','codeword':'m04','incl_excl':'m04','int_sol':'m05','palin':'m05','rec_parity':'m07','rec2':'m08','rec3':'m08','gen_bin':'m10','gen_perm':'m10','gen_comb':'m10','knap':'m12','tsp':'m13'}
@@ -37,12 +37,12 @@ def rec_to_items(recs):
         if r.get('ans') is not None and len(ws)>=3:
             ws=ws[:3]
             opts=[r['ans']]+ws; rr.shuffle(opts)
-            mcq[mod].append(dict(q=fm(r['q']),opts=[fm(str(o)) for o in opts],correct=opts.index(r['ans']),explain=fm(r['sol']),level=r['level'],topic=r['topic'],src=r['src'],origin='goc',mon='TRR1'))
+            mcq[mod].append(dict(q=fm(r['q']),opts=[fm(str(o)) for o in opts],correct=opts.index(r['ans']),explain=fm(r['sol']),level=r['level'],topic=r['topic'],src=r['src'],origin=r.get('origin','goc'),mon='TRR1'))
         else:
-            ess[mod].append(dict(q=fm(r['q']),sol=fm(r['sol']),level=r['level'],topic=r['topic'],src=r['src'],origin='goc',mon='TRR1'))
+            ess[mod].append(dict(q=fm(r['q']),sol=fm(r['sol']),level=r['level'],topic=r['topic'],src=r['src'],origin=r.get('origin','goc'),mon='TRR1'))
     return mcq,ess
 def main():
-    orig_nh.run(); recs=list(RECS)+orig_book.recs()+orig_intro.recs(); recs+=orig_exams.recs()
+    orig_nh.run(); recs=list(RECS)+orig_book.recs()+orig_intro.recs(); recs+=orig_exams.recs(); recs+=orig_more.recs()
     mcq_nh,ess_nh=rec_to_items(recs); mau=load_mau_de()
     gen_mod={}
     for mid,name in MODS:
