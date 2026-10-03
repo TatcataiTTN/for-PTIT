@@ -28,6 +28,7 @@ function submit(){
   if(submitted)return;submitted=true;clearInterval(timer);var set=D.sets[cur],score=0;
   set.forEach(function(q,qi){var box=root.querySelectorAll('.qitem')[qi],opts=box.querySelectorAll('.opt');[].forEach.call(opts,function(o){o.dataset.done='1';o.style.outline=''});
     var ok=ans[qi]===q.correct;if(ok)score++;
+    if(window.Store&&ans[qi]!==undefined)Store.record('ex'+(cur+1)+'-'+(qi+1),ok,{m:'exam',topic:'Đề luyện tập '+(cur+1),lvl:2,ch:ans[qi],snap:{q:q.q,opts:q.opts,correct:q.correct,explain:q.explain,topic:'Đề luyện tập '+(cur+1),level:2}});
     opts[q.correct].classList.add('correct');if(ans[qi]!==undefined&&!ok)opts[ans[qi]].classList.add('wrong');
     var ex=box.querySelector('.explain');ex.innerHTML='';var h=el('div',null,ok?'✅ Đúng':(ans[qi]===undefined?'⚪ Chưa trả lời. Đáp án: ':'❌ Sai. Đáp án đúng: ')+(ok?'':'ABCD'[q.correct]));h.style.fontWeight='800';ex.appendChild(h);ex.appendChild(document.createTextNode(q.explain));ex.classList.add('show')});
   var r=document.getElementById('res');r.textContent='Kết quả: '+score+'/15 câu đúng ('+(score*10/15).toFixed(2)+' điểm thang 10).';r.scrollIntoView({behavior:'smooth',block:'center'});

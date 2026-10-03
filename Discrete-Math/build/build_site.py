@@ -3,24 +3,18 @@ from hx import *
 from qcore import fm
 from sitelib import *
 MODS=[('m01','01-logic-menh-de'),('m02','02-vi-tu-luong-tu'),('m03','03-tap-hop-do-phuc-tap'),('m04','04-nguyen-ly-dem'),('m05','05-to-hop-nghiem-nguyen'),('m06','06-dirichlet-ton-tai'),('m07','07-lap-he-thuc-truy-hoi'),('m08','08-giai-he-thuc-truy-hoi'),('m09','09-ham-sinh'),('m10','10-phuong-phap-sinh'),('m11','11-quay-lui'),('m12','12-cai-tui-nhanh-can'),('m13','13-nguoi-du-lich')]
-def pick_quiz(bank,n=10,seed=1):
+def pick_quiz(bank,n=40,seed=1):
+    """kho ~40 câu cho quiz nhanh: ưu tiên câu gốc, đủ chủ đề và mức 1–3"""
     rng=random.Random(seed)
-    def pick_from(pool,k,exclude):
-        by=collections.defaultdict(list)
-        for it in pool:
-            if it not in exclude: by[it['topic']].append(it)
-        topics=sorted(by); rng.shuffle(topics); out=[]; i=0
-        lv=[1,1,2,2,2,3,3,2,1,3]
-        while len(out)<k and i<400 and topics:
-            t=topics[i%len(topics)]; i+=1
-            want=lv[(len(exclude)+len(out))%len(lv)]
-            c=[x for x in by[t] if x['level']==want and x not in out] or [x for x in by[t] if x not in out]
-            if c: out.append(rng.choice(c))
-            if i>len(topics)*12: break
-        return out
-    goc=[i for i in bank['items'] if i.get('origin')=='goc']
-    out=pick_from(goc,n,[])
-    if len(out)<n: out+=pick_from([i for i in bank['items'] if i not in goc],n-len(out),out)
+    items=[i for i in bank['items'] if i.get('origin')=='goc']
+    if len(items)<n: items+=[i for i in bank['items'] if i.get('origin')!='goc']
+    by=collections.defaultdict(list)
+    for it in items: by[it['topic']].append(it)
+    for v in by.values(): rng.shuffle(v)
+    topics=sorted(by,key=lambda t:-len(by[t])); out=[]
+    while len(out)<n and any(by.values()):
+        for t in topics:
+            if by[t] and len(out)<n: out.append(by[t].pop())
     return out
 DIAG={'m04':[('venn-3-tap','Sơ đồ Venn cho nguyên lý bù trừ ba tập')],'m06':[('dirichlet','Minh họa nguyên lý Dirichlet')],'m08':[('giai-truy-hoi','Quy trình giải hệ thức truy hồi')],'m11':[('cay-quay-lui','Cây quay lui xâu nhị phân n = 3')],'m12':[('cay-cai-tui','Cây nhánh cận bài toán cái túi (giáo trình 2016)')],'m13':[('cay-nguoi-du-lich','Cây nhánh cận bài toán người du lịch (giáo trình 2016)')]}
 def diag_block(mid):
@@ -42,16 +36,16 @@ def module_page(M,idx,bank):
     body+='<h2 id="slide">Bài giảng dạng slide</h2><p class="lead">Dùng phím ← → hoặc các nút; bấm “Toàn màn hình” để trình chiếu. Mỗi slide có khung “Giải thích cho người mới bắt đầu”.</p>'+deck(slides)
     body+=diag_block(M['id'])+'<div id="chi-tiet">'+M['notes']+'</div>'
     q=pick_quiz(bank)
-    body+='<h2 id="quiz">Tự kiểm tra nhanh (10 câu)</h2><p>Bấm đáp án để chấm ngay. Mọi câu đều có giải thích; có nút làm lại từng câu và cả bài.</p>'+quiz_block('quiz-root',q)
+    body+='<h2 id="quiz">Tự kiểm tra nhanh (10 câu, đổi bộ được)</h2><p>Mỗi lần rút 10 câu từ kho của module. Bấm đáp án để chấm ngay; mọi câu đều có giải thích; có nút làm lại từng câu, đổi bộ câu hỏi, và kết quả được ghi vào <a href="../../so-loi/index.html">Sổ lỗi &amp; ôn tập</a>.</p>'+quiz_block('quiz-root',q)
     body+=f'<h2 id="luyen-tap">Luyện tập sâu</h2><div class="grid"><a class="mod-card" href="luyen-tap/index.html"><span class="num">TRẮC NGHIỆM</span><h3>Ngân hàng {len(bank["items"])} câu ({ng} câu gốc)</h3><p>Lọc theo nguồn, mức độ, chủ đề; giải thích chi tiết từng câu; lưu tiến độ; làm lại.</p></a><a class="mod-card" href="luyen-tap/index.html#tu-luan"><span class="num">TỰ LUẬN</span><h3>{len(bank["essays"])} bài có lời giải từng bước</h3><p>Dạng đề thi thật; tự làm rồi đối chiếu lời giải.</p></a></div>'
     prev=MODS[idx-1] if idx>0 else None; nxt=MODS[idx+1] if idx<len(MODS)-1 else None
     body+='<div class="modnav">'+(f'<a href="../{prev[1]}/index.html">← Module {idx}</a>' if prev else '<span></span>')+(f'<a href="../{nxt[1]}/index.html">Module {idx+2} →</a>' if nxt else '<a href="../../luyen-de/index.html">Luyện đề tổng hợp →</a>')+'</div>'
-    return page(f'Module {idx+1}. {M["title"]}',body,d,M['subtitle'],scripts=('dm.js','sim.js','deck.js','quiz.js'))
+    return page(f'Module {idx+1}. {M["title"]}',body,d,M['subtitle'],scripts=('store.js','dm.js','sim.js','deck.js','quiz.js'))
 def bank_page(M,idx,bank):
     body=f'<div class="crumbs"><a href="../../../index.html">Trang chủ</a> › <a href="../index.html">Module {idx+1}</a> › Luyện tập</div><h1>Luyện tập · {M["title"]}</h1><p class="lead">{len(bank["items"])} câu trắc nghiệm + {len(bank["essays"])} bài tự luận. Chọn đáp án là chấm ngay và hiện giải thích chi tiết (kể cả khi đúng). Tiến độ lưu trên trình duyệt này.</p>'
     data=json.dumps(dict(module=bank['module'],items=bank['items'],essays=bank['essays']),ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
     body+=f'<div id="bank"></div><script type="application/json" id="bank-data">{data}</script>'
-    return page(f'Luyện tập · {M["title"]}',body,4,'Ngân hàng câu hỏi',scripts=('bank.js',))
+    return page(f'Luyện tập · {M["title"]}',body,4,'Ngân hàng câu hỏi',scripts=('store.js','bank.js'))
 def build_modules(only=None):
     infos=[]
     for idx,(mid,slug) in enumerate(MODS):
@@ -96,7 +90,7 @@ def luyen_de_page():
     body='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Luyện đề</div><h1>Luyện đề trắc nghiệm tổng hợp</h1><p class="lead">10 đề, mỗi đề 15 câu, 30 phút, đúng cấu trúc bộ đề ôn trắc nghiệm TRR1 của Khoa Trí tuệ nhân tạo (PTIT). Mọi câu là câu gốc của bộ đề; bản gốc không có đáp án nên đáp án ở đây do chúng tôi tự tính bằng chương trình và kiểm chứng độc lập. Bấm “Nộp bài” để xem điểm và giải thích từng câu; “Làm lại” để xóa kết quả.</p>'
     body+=callout('warn','Về phạm vi','Đây là bài kiểm tra TRR1 (INT1358). Các nội dung đồ thị (DFS/BFS, Euler, Hamilton, Dijkstra, cây bao trùm, luồng cực đại) thuộc Toán rời rạc 2 nên không có ở đây.')
     body+=f'<div id="exam"></div><script type="application/json" id="exam-data">{data}</script>'
-    return page('Luyện đề',body,2,'Luyện đề trắc nghiệm TRR1',scripts=('exam.js',))
+    return page('Luyện đề',body,2,'Luyện đề trắc nghiệm TRR1',scripts=('store.js','exam.js'))
 def cau_truc_page():
     b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Cấu trúc đề thi</div><h1>Cấu trúc đề thi Toán rời rạc 1 (INT1358)</h1>'
     b+='<h2>1. Đề cương chính thức</h2>'+table(['Mục','Nội dung'],[['Mã học phần','INT1358 · 3 tín chỉ · bắt buộc · tiên quyết: Nhập môn máy tính và lập trình'],['Giờ học','36 giờ lý thuyết + 8 giờ bài tập'],['Đánh giá','Chuyên cần 10% · bài tập 10% · giữa kỳ 10% · cuối kỳ 70% (thiếu thành phần điểm hoặc nghỉ quá 20% số buổi thì không được thi)'],['Học liệu bắt buộc','Rosen, Discrete Mathematics and its Applications, 8th ed., McGraw-Hill 2018'],['Tham khảo','Epp (5th ed., 2019), Levin (3rd ed., 2019); giáo trình TRR PTIT (Nguyễn Duy Phương); Nguyễn Đức Nghĩa – Nguyễn Tô Thành (2005); Đỗ Đức Giáo (2003)'],['Nội dung','Chương 1 Logic, tập hợp, độ phức tạp · Chương 2 Đếm (gồm truy hồi, hàm sinh) · Chương 3 Liệt kê · Chương 4 Tối ưu · Chương 5 Tồn tại']],'left')
@@ -108,16 +102,32 @@ def cau_truc_page():
     return page('Cấu trúc đề thi',b,2,'Cấu trúc đề thi INT1358')
 def tai_lieu_page():
     b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Tài liệu</div><h1>Tài liệu nguồn: phân loại TRR1, TRR2 và ngoài PTIT</h1><p class="lead">Không phải tài liệu nào trong bộ đầu vào cũng thuộc Toán rời rạc 1 của PTIT. Bảng dưới phân loại từng nguồn và cách chúng tôi sử dụng.</p>'
-    b+='<h2>1. Nguồn dùng cho Toán rời rạc 1 (PTIT)</h2>'+table(['Nguồn','Loại','Cách dùng'],[['Đề cương INT1358 (DISCRETE-MATHEMATICS-I)','chính thức PTIT','Phạm vi 5 chương, đánh giá, học liệu'],['Slide TRR1 (0-Intro, TS. Đào Thị Thuý Quỳnh)','chính thức PTIT (tiếng Anh)','Ví dụ, bài tập gốc, thuật toán'],['Bài giảng TRR1 (ThS. Nguyễn Duy Phương, 2016) và bản 2013','chính thức PTIT','Giáo trình chính, bài tập cuối chương'],['Ngân hàng câu hỏi tự luận INT1358 (2019)','chính thức PTIT','Nguồn câu gốc chính (248 câu con)'],['Đề thi kết thúc học phần 2023–2024 (4 đề)','đề thật PTIT','Phân tích cấu trúc; câu đều có trong ngân hàng 2019'],['4 ảnh đề TRR1 2017–2018 và 2019–2020','đề thật PTIT (ảnh chụp)','Phân tích cấu trúc, ví dụ'],['Đề ôn trắc nghiệm TRR1 (Mẫu đề 2, Khoa Trí tuệ nhân tạo)','bài kiểm tra PTIT (không có đáp án)','741/780 câu kiểm chứng được; đáp án tự tính'],['Sách hướng dẫn học tập TRR (Nguyễn Duy Phương, 2006, hệ từ xa)','PTIT, bản cũ','Phần I (tr. 3–104) = TRR1: chỉ dùng đối chiếu']],'left')
+    b+='<h2>1. Nguồn dùng cho Toán rời rạc 1 (PTIT)</h2>'+table(['Nguồn','Loại','Cách dùng'],[['Đề cương INT1358 (DISCRETE-MATHEMATICS-I)','chính thức PTIT','Phạm vi 5 chương, đánh giá, học liệu'],['Slide TRR1 (0-Intro, TS. Đào Thị Thuý Quỳnh)','chính thức PTIT (tiếng Anh)','Ví dụ, bài tập gốc, thuật toán'],['Bài giảng TRR1 (ThS. Nguyễn Duy Phương, 2016) và bản 2013','chính thức PTIT','Giáo trình chính, bài tập cuối chương'],['Ngân hàng câu hỏi tự luận INT1358 (2019)','chính thức PTIT','Nguồn câu gốc chính (248 câu con)'],['Đề thi kết thúc học phần 2023–2024 (6 đề, đề 01–06)','đề thật PTIT','Phân tích cấu trúc; câu đều có trong ngân hàng 2019'],['4 ảnh đề TRR1 2017–2018 (đề 5, 6) và 2019–2020 (đề 1, 2)','đề thật PTIT (ảnh chụp)','Phân tích cấu trúc, ví dụ'],['Đề ôn trắc nghiệm TRR1 (Mẫu đề 2, Khoa Trí tuệ nhân tạo)','bài kiểm tra PTIT (không có đáp án)','754/780 câu kiểm chứng được (đã quét lại bằng tọa độ chữ); đáp án tự tính'],['Sách hướng dẫn học tập TRR (Nguyễn Duy Phương, 2006, hệ từ xa)','PTIT, bản cũ','Phần I (tr. 3–104) = TRR1: chỉ dùng đối chiếu']],'left')
     b+='<h2>2. Nguồn thuộc Toán rời rạc 2 (không dùng)</h2>'+table(['Nguồn','Ghi chú'],[['DISCRETE-MATHEMATICS-II (đề cương INT1359)','Lý thuyết đồ thị'],['Ngân hàng câu hỏi tự luận 412TRR311 – Toán rời rạc 2','DFS/BFS, Euler, Hamilton, cây bao trùm, đường đi ngắn nhất, luồng'],['Sách hướng dẫn 2006, Phần II (chương 5–8)','Đồ thị'],['Ảnh đề “Toán rời rạc 2” và “toán rời rạc 2.pdf” (đề 2011 sau đại học)','Trộn nhiều chủ đề đồ thị; ngoài phạm vi TRR1']],'left')
     b+='<h2>3. Nguồn không phải của PTIT (chỉ tham khảo, không làm phạm vi)</h2>'+table(['Nguồn','Trường'],[['Slide C0–C14 (Nguyễn Văn Hiệu)','ĐH Bách khoa – ĐH Đà Nẵng'],['Đề cương và slide chương 1–7 (lvluyen)','ĐH Khoa học Tự nhiên TP.HCM'],['Slide Logic/Tập hợp (Nguyễn Thanh Sơn), handout Propositional Logic','ĐH Bách khoa TP.HCM'],['Hướng dẫn sử dụng Maple','không liên quan']],'left')
-    b+='<h2>4. Lỗi và điểm mơ hồ phát hiện trong tài liệu gốc</h2>'+ul(['<b>Giáo trình 2016, §2.4.2 ví dụ 3:</b> phương trình đặc trưng của aₙ = 6aₙ₋₁ − 9aₙ₋₂ ghi r² − 6r − 9 = 0; đúng phải là r² − 6r + 9 = 0.','<b>Ngân hàng 2019, câu 1.19b:</b> (A − B) − C = (A − B) − (B − C) không đúng với mọi tập (phản ví dụ A = {1}, B = ∅, C = {1}).','<b>Ngân hàng 2019, câu 2.2.2b:</b> đề nói “xâu thập phân” nhưng cuối câu ghi “xâu nhị phân”; ta hiểu là xâu thập phân.','<b>Ngân hàng 2019, câu 5.1b:</b> “cùng ngày, tháng sinh” cần giả thiết 366 ngày (kể cả 29/2): đáp án 1465 (bỏ 29/2 thì 1461).','<b>Ngân hàng 2019, câu 2.2.26a:</b> thiếu điều kiện đầu, chỉ xác định được dạng nghiệm tổng quát.','<b>Bài tập giáo trình chương 2, bài 17:</b> số liệu bất khả thi (kết quả âm).','<b>Đề ôn trắc nghiệm:</b> 13 câu có hai phương án trùng nhau (11 câu nghiệm nguyên, 2 câu người du lịch); 26 câu mất phương án hoặc ma trận khi ngắt trang: đã loại (còn 741/780 câu).','<b>Câu người du lịch “f* cập nhật đầu tiên”:</b> đề không nêu thuật toán; cách đọc dùng ở đây (đi theo chỉ số tăng dần) khớp mọi câu còn nguyên phương án nhưng là suy luận.'])
+    b+='<h2>4. Lỗi và điểm mơ hồ phát hiện trong tài liệu gốc</h2>'+ul(['<b>Giáo trình 2016, §2.4.2 ví dụ 3:</b> phương trình đặc trưng của aₙ = 6aₙ₋₁ − 9aₙ₋₂ ghi r² − 6r − 9 = 0; đúng phải là r² − 6r + 9 = 0.','<b>Ngân hàng 2019, câu 1.19b:</b> (A − B) − C = (A − B) − (B − C) không đúng với mọi tập (phản ví dụ A = {1}, B = ∅, C = {1}).','<b>Ngân hàng 2019, câu 2.2.2b:</b> đề nói “xâu thập phân” nhưng cuối câu ghi “xâu nhị phân”; ta hiểu là xâu thập phân.','<b>Ngân hàng 2019, câu 5.1b:</b> “cùng ngày, tháng sinh” cần giả thiết 366 ngày (kể cả 29/2): đáp án 1465 (bỏ 29/2 thì 1461).','<b>Ngân hàng 2019, câu 2.2.26a:</b> thiếu điều kiện đầu, chỉ xác định được dạng nghiệm tổng quát.','<b>Bài tập giáo trình chương 2, bài 17:</b> số liệu bất khả thi (kết quả âm).','<b>Đề ôn trắc nghiệm:</b> 13 câu có hai phương án trùng nhau trong đề gốc (11 câu nghiệm nguyên, 2 câu người du lịch) và 13 câu bị rối thứ tự chữ trong lớp văn bản của PDF (tuple 0/1, mất phương án): đã loại sau khi quét lại bằng tọa độ chữ; còn 754/780 câu.','<b>Câu người du lịch “f* cập nhật đầu tiên”:</b> đề không nêu thuật toán; cách đọc dùng ở đây (đi theo chỉ số tăng dần) khớp mọi câu còn nguyên phương án nhưng là suy luận.'])
     b+='<h2>5. Nguồn gốc câu hỏi trong ngân hàng</h2><p>Mỗi câu ghi rõ nguồn (ví dụ “Ngân hàng 2019 – 2.1.5(a)”, “Slide TRR1 PTIT – Exercise 2”, “Đề ôn trắc nghiệm – đề 7, câu 4”). Câu mang nhãn <b>Bổ sung</b> do chương trình sinh tham số khi tài liệu gốc chưa đủ (Module 2, 9, 11 hầu như hoàn toàn); đáp án được kiểm chứng độc lập bằng vét cạn hoặc quy hoạch động. Nội dung câu gốc do PTIT và các giảng viên biên soạn; trang này chỉ dùng cho mục đích học tập.</p>'
     return page('Tài liệu',b,2,'Phân loại tài liệu TRR1/TRR2')
 def build_extra():
     write('vi/luyen-de/index.html',luyen_de_page())
     write('vi/cau-truc-de/index.html',cau_truc_page())
     write('vi/tai-lieu/index.html',tai_lieu_page())
+
+def review_page():
+    mods={}
+    for mid,slug in MODS:
+        bk=json.load(open(os.path.join(ROOT,'data','qbank',mid+'.json'),encoding='utf-8'))
+        mods[mid]=dict(name=TITLES[mid],slug=slug,n=len(bk['items']),e=len(bk['essays']))
+    data=json.dumps(dict(mods=mods),ensure_ascii=False).replace('</','<\\/')
+    b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Sổ lỗi &amp; ôn tập</div><h1>Sổ lỗi, ôn tập cách quãng và tiến độ toàn khóa</h1>'
+    b+='<p class="lead">Mọi câu bạn làm ở quiz nhanh, ngân hàng câu hỏi và đề luyện tập đều được ghi lại. Câu sai vào <b>Sổ lỗi</b> và được hẹn ôn lại theo lịch cách quãng (1 → 3 → 7 → 14 → 30 ngày khi trả lời đúng; sai thì quay về đầu).</p>'
+    b+=callout('info','Cách dùng','1) Học và làm bài như bình thường. 2) Mỗi ngày mở tab “Ôn tập hôm nay” để làm các câu đến hạn. 3) Xem “Chủ đề cần củng cố” để biết nên đọc lại phần nào. 4) Xuất file sao lưu nếu muốn chuyển sang máy khác.')
+    b+=f'<div id="review"></div><script type="application/json" id="review-meta">{data}</script>'
+    return page('Sổ lỗi & ôn tập',b,2,'Sổ lỗi, ôn tập cách quãng, tiến độ toàn khóa',scripts=('store.js','review.js'))
+_old_extra=build_extra
+def build_extra():
+    _old_extra(); write('vi/so-loi/index.html',review_page())
+
 
 if __name__=='__main__':
     only=sys.argv[1:] or None

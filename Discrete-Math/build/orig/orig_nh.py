@@ -70,6 +70,14 @@ def fmt_sol(sol):
         if r==1 and j==0: term=cs or '1'
         parts.append(('−' if c<0 else ('+' if parts else ''))+((' ' if parts else '')+term))
     return 'aₙ = '+' '.join(parts).replace('+ ','+ ').replace('  ',' ')
+SUPK={1:'',2:'²',3:'³',4:'⁴'}
+def charpoly(cs):
+    k=len(cs); out='r'+SUPK.get(k,'^'+str(k))
+    for i,c in enumerate(cs):
+        if c==0: continue
+        pw=k-1-i; term=(str(abs(c)) if (abs(c)!=1 or pw==0) else '')+('r'+SUPK.get(pw,'^'+str(pw)) if pw>0 else '')
+        out+=(' − ' if c>0 else ' + ')+term
+    return out
 def seq_rec(cs,a0,N):
     a=list(a0)
     for n in range(len(cs),N+1): a.append(sum(c*a[n-1-i] for i,c in enumerate(cs)))
@@ -261,7 +269,7 @@ def handle_part(iid,lab,text,chap):
                 txt=fmt_sol(alt)
                 if txt!=ans: wrong.add(txt)
             if len(wrong)>=6: break
-        add(mod='m08',src=ref,q=f'Hãy tìm nghiệm của công thức truy hồi {rec} với '+', '.join(f'a{sub(i)} = {a0[i]}' for i in range(len(cs)))+'.',ans=ans,wrong=list(wrong),sol=f'Phương trình đặc trưng của {rec}: r{"^"+str(len(cs)) if len(cs)>1 else ""} − … = 0 có nghiệm {rts}.\nNghiệm tổng quát tương ứng; thay điều kiện đầu ta giải hệ được {ans}.\nKiểm tra: '+', '.join(f'a{sub(i)} = {seqv[i]}' for i in range(6))+' khớp với công thức.',level=3 if len(cs)>=3 else 2,topic='Giải bậc 2' if len(cs)==2 else ('Giải bậc 3' if len(cs)==3 else 'Giải bậc 1')); return True
+        add(mod='m08',src=ref,q=f'Hãy tìm nghiệm của công thức truy hồi {rec} với '+', '.join(f'a{sub(i)} = {a0[i]}' for i in range(len(cs)))+'.',ans=ans,wrong=list(wrong),sol=f'Phương trình đặc trưng của {rec}: {charpoly(cs)} = 0 có nghiệm {rts}.\nNghiệm tổng quát tương ứng; thay điều kiện đầu ta giải hệ được {ans}.\nKiểm tra: '+', '.join(f'a{sub(i)} = {seqv[i]}' for i in range(6))+' khớp với công thức.',level=3 if len(cs)>=3 else 2,topic='Giải bậc 2' if len(cs)==2 else ('Giải bậc 3' if len(cs)==3 else 'Giải bậc 1')); return True
     # ---- lập truy hồi cho xâu
     m=re.search(r'chứa một số (lẻ|chẵn) chữ số (\d)',t)
     if m and 'từ mã' in t:

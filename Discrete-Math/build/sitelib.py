@@ -1,7 +1,8 @@
 import os, json, html, re
 from hx import *
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))   # .../Discrete-Math
-NAV=[('Trang chủ','{r}vi/index.html'),('Lộ trình','{r}vi/index.html#lo-trinh'),('Luyện đề','{r}vi/luyen-de/index.html'),('Cấu trúc đề thi','{r}vi/cau-truc-de/index.html'),('Tài liệu','{r}vi/tai-lieu/index.html')]
+NAV=[('Trang chủ','{r}vi/index.html'),('Lộ trình','{r}vi/index.html#lo-trinh'),('Luyện đề','{r}vi/luyen-de/index.html'),('Cấu trúc đề','{r}vi/cau-truc-de/index.html'),('Tài liệu','{r}vi/tai-lieu/index.html')]
+TOOLS=[('🎯 Kiểm tra đầu vào','{r}vi/kiem-tra-dau-vao/index.html'),('📓 Sổ lỗi & ôn tập','{r}vi/so-loi/index.html'),('🔤 Thuật ngữ Việt–Anh','{r}vi/thuat-ngu/index.html'),('∑ Tóm tắt công thức','{r}vi/cong-thuc/index.html')]
 SRC=[('19SgNozB5mT-G2cJXGYmimcKXKzROf3t7','0-Intro_en-da-gop.pdf','slide TRR1 (TS. Đào Thị Thuý Quỳnh)'),
 ('1_qNbqwynY-nnEIVpNDDPpZ8oD7nPt_sP','Toán rời rạc 1 - 2016.pdf','bài giảng/giáo trình TRR1 2016 (ThS. Nguyễn Duy Phương)'),
 ('1aVoHQjjbqh65QKnllJ5kvWvdErwWY0-M','Bài giảng toán rời rạc 1 PTIT (Studocu)','bài giảng TRR1 2013'),
@@ -16,12 +17,14 @@ def src_list():
 def page(title,body,depth,desc='',scripts=(),extra_head=''):
     r='../'*depth
     nav=''.join(f'<a href="{u.format(r=r)}">{t}</a>' for t,u in NAV)
+    tools=''.join(f'<a href="{u.format(r=r)}" style="display:block">{t}</a>' for t,u in TOOLS)
     sc=''.join(f'<script src="{r}_shared/{s}"></script>' for s in scripts)
     return f'''<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)} · Toán rời rạc 1 PTIT</title><meta name="description" content="{esc(desc)}">
 <script>(function(){{try{{var t=localStorage.getItem('site-theme');if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t);var f=localStorage.getItem('site-font');if(f)document.documentElement.style.fontSize=f}}catch(e){{}}}})();</script>
 <link rel="stylesheet" href="{r}_shared/common.css">{extra_head}</head><body>
 <header class="top"><div class="wrap"><a class="brand" href="{r}vi/index.html">∑ Toán rời rạc 1 · PTIT</a><nav>{nav}
+<details class="menu"><summary>🧰 Học tập ▾</summary><div class="pop">{tools}</div></details>
 <details class="menu"><summary>🎨 Giao diện</summary><div class="pop"><button data-set-theme="light">Sáng</button><button data-set-theme="dark">Tối</button><button data-set-theme="sepia">Sepia</button><hr><button data-set-font="14px">Chữ nhỏ</button><button data-set-font="16px">Chữ vừa</button><button data-set-font="19px">Chữ lớn</button></div></details></nav></div></header>
 <main class="wrap">{body}</main>
 <footer class="foot"><div class="wrap"><p><b>Nguồn tài liệu:</b> các file PDF trong thư mục Google Drive <a href="https://drive.google.com/drive/folders/1fSjd2VaR3lK7kNsXpz_zEZJKAeOrao2q?usp=sharing" target="_blank" rel="noopener">drive.google.com/drive/folders/1fSjd2VaR3lK7kNsXpz_zEZJKAeOrao2q</a>:</p><ul style="margin:.3em 0 .8em;padding-left:1.2em">{src_list()}</ul>

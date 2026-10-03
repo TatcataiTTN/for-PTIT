@@ -33,6 +33,6 @@ def deck(slides_html,deck_id='d0'):
     return (f'<div class="mdeck" id="{deck_id}"><div class="mdeck-viewport">{s}</div>'
             '<div class="mdeck-bar"><button class="mdeck-prev" type="button">◀ Trước</button><button class="mdeck-next" type="button">Sau ▶</button>'
             '<span class="mdeck-count"></span><div class="mdeck-dots"></div><button class="mdeck-fs" type="button">⛶ Toàn màn hình</button></div></div>')
-def quiz_block(root_id,items,title='Tự kiểm tra nhanh'):
-    data=json.dumps(dict(items=[dict(q=i['q'],opts=i['opts'],correct=i['correct'],explain=i['explain']) for i in items]),ensure_ascii=False).replace('</','<\\/')
+def quiz_block(root_id,items,title='Tự kiểm tra nhanh',pick=10):
+    data=json.dumps(dict(pick=pick,items=[dict(id=i.get('id'),m=i.get('id','').split('-')[0] if i.get('id') else None,topic=i.get('topic'),level=i.get('level'),q=i['q'],opts=i['opts'],correct=i['correct'],explain=i['explain']) for i in items]),ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
     return f'<div class="quiz"><div id="{root_id}"></div></div><script type="application/json" class="quiz-data" data-root="{root_id}">{data}</script>'
