@@ -36,3 +36,5 @@ def deck(slides_html,deck_id='d0'):
 def quiz_block(root_id,items,title='Tự kiểm tra nhanh',pick=10):
     data=json.dumps(dict(pick=pick,items=[dict(id=i.get('id'),m=i.get('id','').split('-')[0] if i.get('id') else None,topic=i.get('topic'),level=i.get('level'),q=i['q'],opts=i['opts'],correct=i['correct'],explain=i['explain']) for i in items]),ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
     return f'<div class="quiz"><div id="{root_id}"></div></div><script type="application/json" class="quiz-data" data-root="{root_id}">{data}</script>'
+
+def viz(name): return f'<div class="sim" data-viz="{name}"></div>'

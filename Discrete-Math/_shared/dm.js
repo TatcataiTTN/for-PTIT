@@ -176,14 +176,16 @@ function bestEdge(A,rows,cols){var beta=-1,best=null;
 DM.tspBB=function(C){
   var n=C.length,best=INF,bestTour=null,log=[];
   function isTour(edges){var d={};edges.forEach(function(e){d[e[0]]=e[1]});var k=0,cnt=0;do{if(d[k]===undefined)return false;k=d[k];cnt++}while(k!==0&&cnt<=n);return cnt===n&&k===0}
+  function snap(A,rows,cols,edges){return {mat:A.map(function(r){return r.slice()}),rows:rows.slice(),cols:cols.slice(),edges:edges.map(function(e){return [e[0]+1,e[1]+1]})}}
+  function mk(o,A,rows,cols,edges){var z=snap(A,rows,cols,edges);for(var k in z)o[k]=z[k];return o}
   function node(A,rows,cols,edges,bound,depth,label){
-    if(bound>=best){log.push({depth:depth,label:label,bound:bound,status:'cut'});return}
+    if(bound>=best){log.push(mk({depth:depth,label:label,bound:bound,status:'cut',best:best},A,rows,cols,edges));return}
     if(rows.length===2){var u=rows[0],v=rows[1],w=cols[0],x=cols[1];var opts=[[[u,w],[v,x]],[[u,x],[v,w]]];
       for(var oi=0;oi<2;oi++){var o=opts[oi];if(A[o[0][0]][o[0][1]]<INF&&A[o[1][0]][o[1][1]]<INF){var all=edges.concat(o);if(isTour(all)){var cost=0;all.forEach(function(e){cost+=C[e[0]][e[1]]});
-        log.push({depth:depth,label:label,bound:bound,status:cost<best?'record':'leaf',cost:cost,tour:all});if(cost<best){best=cost;bestTour=all}return}}}
-      log.push({depth:depth,label:label,bound:bound,status:'dead'});return}
-    var be=bestEdge(A,rows,cols);if(!be.edge){log.push({depth:depth,label:label,bound:bound,status:'dead'});return}var r=be.edge[0],c=be.edge[1];
-    log.push({depth:depth,label:label,bound:bound,status:'branch',edge:[r+1,c+1],beta:be.beta});
+        log.push(mk({depth:depth,label:label,bound:bound,status:cost<best?'record':'leaf',cost:cost,tour:all,best:best},A,rows,cols,edges));if(cost<best){best=cost;bestTour=all}return}}}
+      log.push(mk({depth:depth,label:label,bound:bound,status:'dead'},A,rows,cols,edges));return}
+    var be=bestEdge(A,rows,cols);if(!be.edge){log.push(mk({depth:depth,label:label,bound:bound,status:'dead'},A,rows,cols,edges));return}var r=be.edge[0],c=be.edge[1];
+    log.push(mk({depth:depth,label:label,bound:bound,status:'branch',edge:[r+1,c+1],beta:be.beta,best:best},A,rows,cols,edges));
     /* nhánh trái: chứa (r,c) */
     var A1=A.map(function(x){return x.slice()}),e1=edges.concat([[r,c]]);
     var inv={};e1.forEach(function(e){inv[e[1]]=e[0]});var d1={};e1.forEach(function(e){d1[e[0]]=e[1]});
@@ -197,7 +199,7 @@ DM.tspBB=function(C){
     node(A2,rows,cols,edges,b2,depth+1,'không chứa ('+(r+1)+','+(c+1)+')');
   }
   var A=C.map(function(row,i){return row.map(function(x,j){return i===j?INF:x})}),rows=[],cols=[];for(var i=0;i<n;i++){rows.push(i);cols.push(i)}
-  var root=reduceM(A,rows,cols);log.push({depth:0,label:'gốc',bound:root,status:'root'});
+  var root=reduceM(A,rows,cols);log.push({depth:0,label:'gốc',bound:root,status:'root',mat:A.map(function(r){return r.slice()}),rows:rows.slice(),cols:cols.slice(),edges:[]});
   node(A,rows,cols,[],root,0,'gốc (sau rút gọn)');
   var tour=null;if(bestTour){var d={};bestTour.forEach(function(e){d[e[0]]=e[1]});tour=[1];var k=0;for(var s=0;s<n;s++){k=d[k];tour.push(k+1)}}
   return {cost:best,tour:tour,root:root,log:log};

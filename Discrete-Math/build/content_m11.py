@@ -13,7 +13,7 @@ def module():
         explain='Giống đi trong mê cung: đến ngã rẽ chọn một hướng; nếu bế tắc thì quay lại ngã rẽ gần nhất và thử hướng khác. Việc “quay lại” do lời gọi đệ quy trả về.'))
     parts.append(dict(title='Nền tảng',bullets=['Khung Try(i)','Năm bước'],slides=s))
     s=[]
-    s.append(sl('<p>Xâu nhị phân độ dài n (2ⁿ nghiệm):</p><pre><code>'+esc(CPP['bin_bt'])+'</code></pre>'+sim('bt'),'PHẦN 2 · Phương pháp','Quay lui: xâu nhị phân'))
+    s.append(sl('<p>Xâu nhị phân độ dài n (2ⁿ nghiệm):</p><pre><code>'+esc(CPP['bin_bt'])+'</code></pre>'+viz('bt'),'PHẦN 2 · Phương pháp','Quay lui: xâu nhị phân'))
     s.append(sl('<p>Hoán vị (dùng mảng used để đảm bảo khác nhau):</p><pre><code>'+esc(CPP['perm_bt'])+'</code></pre>','PHẦN 2 · Phương pháp','Quay lui: hoán vị'))
     s.append(sl('<p>Tổ hợp chập k (cận trên n − k + i cắt sớm các nhánh không đủ phần tử):</p><pre><code>'+esc(CPP['comb_bt'])+'</code></pre>','PHẦN 2 · Phương pháp','Quay lui: tổ hợp'))
     parts.append(dict(title='Phương pháp: ba mẫu quay lui',bullets=['Xâu nhị phân','Hoán vị','Tổ hợp'],slides=s))

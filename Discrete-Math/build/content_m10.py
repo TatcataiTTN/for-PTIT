@@ -20,7 +20,7 @@ def module():
     s=[]
     s.append(sl(formula('Xâu nhị phân kế tiếp','tìm k lớn nhất có xₖ = 0; đặt xₖ = 1 và xⱼ = 0 với j > k',[('không có k','x = 11…1 là xâu cuối'),('bản chất','y = x + 1 trong hệ nhị phân')])+'<pre><code>'+esc(CPP['bin_gen'])+'</code></pre>','PHẦN 2 · Phương pháp','Sinh xâu nhị phân'))
     s.append(sl(formula('Hoán vị kế tiếp','1) i lớn nhất: p[i] < p[i+1];  2) j lớn nhất: p[j] > p[i];  3) đổi chỗ p[i], p[j];  4) đảo đoạn p[i+1..n]')+'<p>Hoán vị đầu (1,2,…,n), cuối (n,…,2,1). Mỗi lần sinh O(n); tổng n! hoán vị.</p><pre><code>'+esc(CPP['perm_gen'])+'</code></pre>','PHẦN 2 · Phương pháp','Sinh hoán vị'))
-    s.append(sl(formula('Tổ hợp chập k kế tiếp','i lớn nhất có c[i] ≠ n − k + i;  c[i]++;  c[j] = c[j−1] + 1 (j > i)')+'<p>Tổ hợp đầu (1,…,k), cuối (n−k+1,…,n). C(n,k) tổ hợp.</p>'+sim('gen'),'PHẦN 2 · Phương pháp','Sinh tổ hợp'))
+    s.append(sl(formula('Tổ hợp chập k kế tiếp','i lớn nhất có c[i] ≠ n − k + i;  c[i]++;  c[j] = c[j−1] + 1 (j > i)')+'<p>Tổ hợp đầu (1,…,k), cuối (n−k+1,…,n). C(n,k) tổ hợp.</p>'+viz('gen'),'PHẦN 2 · Phương pháp','Sinh tổ hợp'))
     parts.append(dict(title='Phương pháp: ba thuật toán sinh',bullets=['Xâu nhị phân','Hoán vị','Tổ hợp'],slides=s))
     s=[]
     s.append(sl(callout('info','Ví dụ 1 (3.2a, đề 2023–2024)','A = {1,…,9}. Tìm 4 hoán vị liền kề tiếp theo của 568397421.')+'<p>'+' → '.join(T(x) for x in [p0]+pc)+'</p>'+callout('info','Bước đầu','(5,6,8,3,9,7,4,2,1): i = vị trí 4 (giá trị 3 < 9); j = vị trí 6 (giá trị 7 > 3); đổi chỗ: (5,6,8,7,9,3,4,2,1); đảo đoạn sau vị trí 4: (5,6,8,7,1,2,4,3,9).'),'PHẦN 3 · Ví dụ','Ví dụ 1: hoán vị kế tiếp'))

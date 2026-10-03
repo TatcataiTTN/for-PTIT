@@ -30,7 +30,7 @@ def module():
     parts.append(dict(title='Nền tảng',bullets=['Bài toán TSP','Rút gọn ma trận'],slides=s))
     s=[]
     s.append(sl(formula('Chọn cạnh phân nhánh','chọn số 0 tại (r,c) có θ = min(dòng r, bỏ ô đó) + min(cột c, bỏ ô đó) lớn nhất')+'<ul><li><b>Nhánh không chứa (r,c):</b> đặt C[r][c] = ∞, rút gọn lại: cận dưới tăng đúng θ.</li><li><b>Nhánh chứa (r,c):</b> bỏ dòng r và cột c; đặt ô đóng chu trình con (j_k, i₁) = ∞; rút gọn, cộng vào cận dưới.</li></ul><p>Ưu tiên nhánh <b>chứa</b> trước. Khi ma trận còn 2×2 kết nạp nốt hai cạnh để được hành trình đầy đủ.</p>','PHẦN 2 · Phương pháp','Phân nhánh trái và phải'))
-    s.append(sl(ol(['Rút gọn ma trận gốc, được cận dưới L₀.','Chọn (r,c) theo θ lớn nhất; sinh hai nút con.','Đi xuống nhánh chứa cho tới khi được hành trình đầy đủ: kỷ lục đầu tiên.','Quay lại các nút còn lại: cắt nếu cận dưới ≥ kỷ lục, ngược lại phát triển tiếp.'])+sim('tsp'),'PHẦN 2 · Phương pháp','Quy trình và thực hành'))
+    s.append(sl(ol(['Rút gọn ma trận gốc, được cận dưới L₀.','Chọn (r,c) theo θ lớn nhất; sinh hai nút con.','Đi xuống nhánh chứa cho tới khi được hành trình đầy đủ: kỷ lục đầu tiên.','Quay lại các nút còn lại: cắt nếu cận dưới ≥ kỷ lục, ngược lại phát triển tiếp.'])+viz('tsp'),'PHẦN 2 · Phương pháp','Quy trình và hoạt ảnh từng bước'))
     parts.append(dict(title='Phương pháp',bullets=['Chọn cạnh, hai nhánh','Quy trình'],slides=s))
     s=[]
     s.append(sl(callout('info','Ví dụ giáo trình (n = 6)','Ma trận ở trên.')+'<pre style="font-size:.75em">'+esc(logtxt(rR,30))+'</pre><p>Khớp giáo trình: cạnh (6,3) β = 48 nên nhánh không chứa có cận 81 + 48 = 129; tiếp theo (4,6) β = 32; (2,1) β = 20; (1,4); được hành trình 1→4→6→3→5→2→1 chi phí 104.</p>','PHẦN 3 · Ví dụ','Ví dụ 1: ví dụ giáo trình (kết quả 104)'))

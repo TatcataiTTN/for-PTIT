@@ -40,7 +40,7 @@ def module_page(M,idx,bank):
     body+=f'<h2 id="luyen-tap">Luyện tập sâu</h2><div class="grid"><a class="mod-card" href="luyen-tap/index.html"><span class="num">TRẮC NGHIỆM</span><h3>Ngân hàng {len(bank["items"])} câu ({ng} câu gốc)</h3><p>Lọc theo nguồn, mức độ, chủ đề; giải thích chi tiết từng câu; lưu tiến độ; làm lại.</p></a><a class="mod-card" href="luyen-tap/index.html#tu-luan"><span class="num">TỰ LUẬN</span><h3>{len(bank["essays"])} bài có lời giải từng bước</h3><p>Dạng đề thi thật; tự làm rồi đối chiếu lời giải.</p></a></div>'
     prev=MODS[idx-1] if idx>0 else None; nxt=MODS[idx+1] if idx<len(MODS)-1 else None
     body+='<div class="modnav">'+(f'<a href="../{prev[1]}/index.html">← Module {idx}</a>' if prev else '<span></span>')+(f'<a href="../{nxt[1]}/index.html">Module {idx+2} →</a>' if nxt else '<a href="../../luyen-de/index.html">Luyện đề tổng hợp →</a>')+'</div>'
-    return page(f'Module {idx+1}. {M["title"]}',body,d,M['subtitle'],scripts=('store.js','dm.js','sim.js','deck.js','quiz.js'))
+    return page(f'Module {idx+1}. {M["title"]}',body,d,M['subtitle'],scripts=('store.js','dm.js','sim.js','viz.js','deck.js','quiz.js'))
 def bank_page(M,idx,bank):
     body=f'<div class="crumbs"><a href="../../../index.html">Trang chủ</a> › <a href="../index.html">Module {idx+1}</a> › Luyện tập</div><h1>Luyện tập · {M["title"]}</h1><p class="lead">{len(bank["items"])} câu trắc nghiệm + {len(bank["essays"])} bài tự luận. Chọn đáp án là chấm ngay và hiện giải thích chi tiết (kể cả khi đúng). Tiến độ lưu trên trình duyệt này.</p>'
     data=json.dumps(dict(module=bank['module'],items=bank['items'],essays=bank['essays']),ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
