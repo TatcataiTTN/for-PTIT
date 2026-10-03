@@ -73,6 +73,7 @@ def home_page(done):
             cards+=f'<div class="mod-card" style="opacity:.55;cursor:default"><span class="num">MODULE {idx+1} · {CHAP[mid]}</span><h3>{TITLES[mid]}</h3><p>Sắp có</p></div>'
     body='<h1>Toán rời rạc 1 (INT1358) · Tự học theo đề cương PTIT</h1><p class="lead">13 module bám sát giáo trình PTIT 2016, đề cương INT1358 và đề thi thật (2017–2024): slide có giải thích cho người mới, ví dụ đầy đủ lời giải, mô phỏng tương tác, ngân hàng câu hỏi có giải thích và bài tự luận từng bước.</p>'
     body+=callout('info','Cách học gợi ý','Mỗi module: xem slide → đọc phần “Nội dung chi tiết và ví dụ” → thử mô phỏng → làm quiz 10 câu → luyện ngân hàng câu hỏi → làm tự luận. Trước kỳ thi làm 10 đề trắc nghiệm ở mục Luyện đề.')
+    body+='<h2>Công cụ học tập</h2><div class="grid"><a class="mod-card" href="kiem-tra-dau-vao/index.html"><span class="num">BẮT ĐẦU TẠI ĐÂY</span><h3>🎯 Kiểm tra đầu vào</h3><p>30 câu: biết cần ôn kiến thức nền nào.</p></a><a class="mod-card" href="so-loi/index.html"><span class="num">TIẾN ĐỘ</span><h3>📓 Sổ lỗi &amp; ôn tập</h3><p>Câu sai, lịch ôn cách quãng, tiến độ toàn khóa.</p></a><a class="mod-card" href="thuat-ngu/index.html"><span class="num">SLIDE TIẾNG ANH</span><h3>🔤 Thuật ngữ Việt–Anh</h3><p>110 thuật ngữ, tìm kiếm theo module.</p></a><a class="mod-card" href="cong-thuc/index.html"><span class="num">TRƯỚC KỲ THI</span><h3>∑ Tóm tắt công thức</h3><p>Công thức, khi nào dùng, dạng đề.</p></a></div>'
     body+=f'<h2 id="lo-trinh">Lộ trình 13 module</h2><div class="grid">{cards}</div>'
     body+='<h2>Bản đồ môn học</h2><div class="diag"><a href="../assets/diagrams/course-map.png" target="_blank" rel="noopener"><img src="../assets/diagrams/course-map.png" alt="Bản đồ 13 module" loading="lazy" style="max-height:none"></a></div>'
     body+=callout('warn','Về nguồn câu hỏi','Ngân hàng ưu tiên các câu GỐC trích từ tài liệu (ngân hàng câu hỏi 2019, đề thi 2017–2024, bộ đề ôn trắc nghiệm); mỗi câu ghi rõ nguồn. Chỉ khi nguồn gốc quá ít mới có câu “Bổ sung” do chương trình sinh và tự kiểm chứng.')
@@ -127,6 +128,36 @@ def review_page():
 _old_extra=build_extra
 def build_extra():
     _old_extra(); write('vi/so-loi/index.html',review_page())
+
+def placement_page():
+    import placement_data as P
+    data=dict(skills=[dict(id=k['id'],name=k['name'],mods=k['mods'],refresh=k['refresh'],qs=[dict(q=fm(q['q']),ans=q['ans'],wrong=q['wrong'],expl=q['expl']) for q in k['qs']]) for k in P.SK],slugs=dict(MODS))
+    js=json.dumps(data,ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
+    b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Kiểm tra đầu vào</div><h1>Kiểm tra đầu vào: bạn cần ôn lại gì?</h1><p class="lead">Toán rời rạc 1 dùng nhiều kiến thức nền: logic cơ bản, tập hợp, chia hết, đếm, tổng cấp số, lũy thừa/logarit, đệ quy và đọc chương trình. Bài này có 30 câu (3 câu cho mỗi trong 10 kỹ năng, chọn ngẫu nhiên từ 60 câu, đáp án đã tính bằng chương trình), cho biết kỹ năng nào còn yếu và nên ôn module nào trước. Có thể làm lại để đổi bộ câu.</p>'
+    b+=f'<div id="placement"></div><script type="application/json" id="placement-data">{js}</script>'
+    return page('Kiểm tra đầu vào',b,2,'Kiểm tra kiến thức nền trước khi học TRR1',scripts=('store.js','placement.js'))
+def glossary_page():
+    import glossary_data as GD
+    mods=dict((m,f'M{int(m[1:])}') for m,_ in MODS)
+    rows=''.join(f'<tr data-m="{m}"><td><b>{esc(v)}</b></td><td lang="en">{esc(e)}</td><td><a href="../modules/{dict(MODS)[m]}/index.html">{mods[m]}</a></td><td>{esc(n)}</td></tr>' for v,e,m,n in GD.G)
+    b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Thuật ngữ Việt–Anh</div><h1>Thuật ngữ Việt–Anh</h1><p class="lead">Slide chính thức của Khoa (TS. Đào Thị Thuý Quỳnh) và giáo trình Rosen 8th (học liệu bắt buộc của INT1358) đều bằng tiếng Anh. Bảng này giúp đọc slide và đề tiếng Anh. Gõ vào ô tìm (tiếng Việt hoặc tiếng Anh) để lọc.</p>'
+    b+='<p><input id="gq" type="search" placeholder="Tìm thuật ngữ…" style="width:100%;max-width:420px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit"> <select id="gm" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)"><option value="">Mọi module</option>'+''.join(f'<option value="{m}">Module {int(m[1:])}</option>' for m,_ in MODS)+'</select> <span id="gc"></span></p>'
+    b+=f'<div style="overflow-x:auto"><table class="t left" id="gt"><tr><th>Tiếng Việt</th><th>English</th><th>Module</th><th>Ghi chú / ký hiệu</th></tr>{rows}</table></div>'
+    b+='<script>(function(){var q=document.getElementById("gq"),m=document.getElementById("gm"),c=document.getElementById("gc"),rs=[].slice.call(document.querySelectorAll("#gt tr[data-m]"));function f(){var s=q.value.trim().toLowerCase(),k=m.value,n=0;rs.forEach(function(r){var ok=(!k||r.dataset.m===k)&&(!s||r.textContent.toLowerCase().indexOf(s)>=0);r.style.display=ok?"":"none";if(ok)n++});c.textContent=n+" / "+rs.length+" thuật ngữ"}q.oninput=f;m.onchange=f;f()})()</script>'
+    return page('Thuật ngữ Việt–Anh',b,2,'Bảng thuật ngữ song ngữ Toán rời rạc 1')
+def formula_page():
+    import formula_data as FD
+    b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Tóm tắt công thức</div><h1>Tóm tắt công thức theo module</h1><p class="lead">Mỗi dòng: công thức, khi nào dùng và dạng đề thi tương ứng. Trang này cố ý gọn để in (Ctrl+P). Cần chứng minh hoặc ví dụ thì vào module tương ứng.</p>'
+    for m,name,rows in FD.F:
+        b+=f'<h2><a href="../modules/{dict(MODS)[m]}/index.html">Module {int(m[1:])} · {esc(name)}</a></h2>'+table(['Công thức / quy tắc','Khi nào dùng','Dạng đề'],[[esc(a),esc(c),esc(d)] for a,c,d in rows],'left')
+    b+=callout('warn','Lưu ý','Đây là bản tóm tắt; khi thi cần trình bày lời giải đầy đủ (ghi rõ phép biến đổi, điều kiện đầu, từng bước thuật toán), không chỉ ghi công thức.')
+    return page('Tóm tắt công thức',b,2,'Công thức TRR1 theo module')
+_old2=build_extra
+def build_extra():
+    _old2()
+    write('vi/kiem-tra-dau-vao/index.html',placement_page())
+    write('vi/thuat-ngu/index.html',glossary_page())
+    write('vi/cong-thuc/index.html',formula_page())
 
 
 if __name__=='__main__':
