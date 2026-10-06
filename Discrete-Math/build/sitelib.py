@@ -1,7 +1,7 @@
 import os, json, html, re
 from hx import *
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))   # .../Discrete-Math
-NAV=[('Trang chủ','{r}vi/index.html'),('Lộ trình','{r}vi/index.html#lo-trinh'),('Luyện đề','{r}vi/luyen-de/index.html'),('Cấu trúc đề','{r}vi/cau-truc-de/index.html'),('Tài liệu','{r}vi/tai-lieu/index.html')]
+NAV=[('Trang chủ','{r}vi/index.html'),('Lộ trình','{r}vi/index.html#lo-trinh'),('Luyện đề','{r}vi/luyen-de/index.html'),('Cấu trúc đề','{r}vi/cau-truc-de/index.html'),('Thực hành Python','{r}vi/lap-trinh-python/index.html'),('Tài liệu','{r}vi/tai-lieu/index.html')]
 TOOLS=[('🎯 Kiểm tra đầu vào','{r}vi/kiem-tra-dau-vao/index.html'),('📓 Sổ lỗi & ôn tập','{r}vi/so-loi/index.html'),('🔤 Thuật ngữ Việt–Anh','{r}vi/thuat-ngu/index.html'),('∑ Tóm tắt công thức','{r}vi/cong-thuc/index.html')]
 SRC=[('19SgNozB5mT-G2cJXGYmimcKXKzROf3t7','0-Intro_en-da-gop.pdf','slide TRR1 (TS. Đào Thị Thuý Quỳnh)'),
 ('1_qNbqwynY-nnEIVpNDDPpZ8oD7nPt_sP','Toán rời rạc 1 - 2016.pdf','bài giảng/giáo trình TRR1 2016 (ThS. Nguyễn Duy Phương)'),
