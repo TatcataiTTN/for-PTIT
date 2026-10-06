@@ -2,7 +2,7 @@ import os, json, html, re
 from hx import *
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))   # .../Discrete-Math
 NAV=[('Trang chủ','{r}vi/index.html'),('Lộ trình','{r}vi/index.html#lo-trinh'),('Luyện đề','{r}vi/luyen-de/index.html'),('Cấu trúc đề','{r}vi/cau-truc-de/index.html'),('Thực hành Python','{r}vi/lap-trinh-python/index.html'),('Tài liệu','{r}vi/tai-lieu/index.html')]
-TOOLS=[('🎯 Kiểm tra đầu vào','{r}vi/kiem-tra-dau-vao/index.html'),('📓 Sổ lỗi & ôn tập','{r}vi/so-loi/index.html'),('🔤 Thuật ngữ Việt–Anh','{r}vi/thuat-ngu/index.html'),('∑ Tóm tắt công thức','{r}vi/cong-thuc/index.html')]
+TOOLS=[('⏱ Thi thử Python','{r}vi/thi-thu-python/index.html'),('🎯 Kiểm tra đầu vào','{r}vi/kiem-tra-dau-vao/index.html'),('📓 Sổ lỗi & ôn tập','{r}vi/so-loi/index.html'),('🔤 Thuật ngữ Việt–Anh','{r}vi/thuat-ngu/index.html'),('∑ Tóm tắt công thức','{r}vi/cong-thuc/index.html')]
 SRC=[('19SgNozB5mT-G2cJXGYmimcKXKzROf3t7','0-Intro_en-da-gop.pdf','slide TRR1 (TS. Đào Thị Thuý Quỳnh)'),
 ('1_qNbqwynY-nnEIVpNDDPpZ8oD7nPt_sP','Toán rời rạc 1 - 2016.pdf','bài giảng/giáo trình TRR1 2016 (ThS. Nguyễn Duy Phương)'),
 ('1aVoHQjjbqh65QKnllJ5kvWvdErwWY0-M','Bài giảng toán rời rạc 1 PTIT (Studocu)','bài giảng TRR1 2013'),
@@ -18,7 +18,7 @@ def page(title,body,depth,desc='',scripts=(),extra_head=''):
     r='../'*depth
     nav=''.join(f'<a href="{u.format(r=r)}">{t}</a>' for t,u in NAV)
     tools=''.join(f'<a href="{u.format(r=r)}" style="display:block">{t}</a>' for t,u in TOOLS)
-    sc=''.join(f'<script src="{r}_shared/{s}"></script>' for s in scripts)
+    sc=''.join(f'<script src="{s if s.startswith("http") else r+"_shared/"+s}"></script>' for s in scripts)
     return f'''<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)} · Toán rời rạc 1 PTIT</title><meta name="description" content="{esc(desc)}">
 <script>(function(){{try{{var t=localStorage.getItem('site-theme');if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t);var f=localStorage.getItem('site-font');if(f)document.documentElement.style.fontSize=f}}catch(e){{}}}})();</script>

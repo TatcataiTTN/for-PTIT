@@ -1,0 +1,136 @@
+{
+ "sets": [
+  {
+   "id": "de-01",
+   "title": "Đề 1: Tập hợp, truy hồi, nghiệm nguyên",
+   "ids": [
+    "tap-hop",
+    "truy-hoi-tinh",
+    "nghiem-nguyen"
+   ],
+   "minutes": 60,
+   "desc": "Mở đầu nhẹ; truy hồi và đếm nghiệm có cận."
+  },
+  {
+   "id": "de-02",
+   "title": "Đề 2: Logic, bù trừ, n quân hậu",
+   "ids": [
+    "logic-phan-loai",
+    "bu-tru",
+    "n-quan-hau"
+   ],
+   "minutes": 60,
+   "desc": "Bảng chân lý, nguyên lý bù trừ, quay lui."
+  },
+  {
+   "id": "de-03",
+   "title": "Đề 3: Tổ hợp, tháp Hà Nội, số thuận nghịch",
+   "ids": [
+    "hoan-vi-to-hop",
+    "thap-ha-noi",
+    "thuan-nghich"
+   ],
+   "minutes": 60,
+   "desc": "Đếm cơ bản đến đếm có cấu trúc."
+  },
+  {
+   "id": "de-04",
+   "title": "Đề 4: Dirichlet, tổ hợp kế tiếp, cái túi",
+   "ids": [
+    "dirichlet",
+    "to-hop-ke-tiep",
+    "cai-tui"
+   ],
+   "minutes": 60,
+   "desc": "Dirichlet, thuật toán sinh, tối ưu."
+  },
+  {
+   "id": "de-05",
+   "title": "Đề 5: Lượng từ, hoán vị kế tiếp, xâu có k số 1",
+   "ids": [
+    "luong-tu",
+    "hoan-vi-ke-tiep",
+    "k-so-1-lien-tiep"
+   ],
+   "minutes": 60,
+   "desc": "Logic vị từ, sinh hoán vị, lập truy hồi."
+  },
+  {
+   "id": "de-06",
+   "title": "Đề 6: Sinh xâu, đổi tiền, hàm sinh",
+   "ids": [
+    "sinh-xau-nhi-phan",
+    "doi-tien",
+    "ham-sinh-chon-qua"
+   ],
+   "minutes": 60,
+   "desc": "Sinh cấu hình và hàm sinh."
+  },
+  {
+   "id": "de-07",
+   "title": "Đề 7: Quay lui, tập con, hạng hoán vị",
+   "ids": [
+    "hoan-vi-quay-lui",
+    "tap-con-tong",
+    "hang-hoan-vi"
+   ],
+   "minutes": 60,
+   "desc": "Quay lui và xếp hạng hoán vị."
+  },
+  {
+   "id": "de-08",
+   "title": "Đề 8: Từ mã, người du lịch, đường đi trên lưới",
+   "ids": [
+    "tu-ma",
+    "nguoi-du-lich",
+    "duong-di-khong-lap"
+   ],
+   "minutes": 60,
+   "desc": "Đếm, vét cạn TSP, quay lui trên lưới."
+  },
+  {
+   "id": "de-09",
+   "title": "Đề 9: Liệt kê tổ hợp, cận dưới TSP, nghiệm phân biệt",
+   "ids": [
+    "to-hop-liet-ke",
+    "can-duoi-tsp",
+    "nghiem-phan-biet"
+   ],
+   "minutes": 60,
+   "desc": "Thuật toán sinh, nhánh cận, truy hồi."
+  },
+  {
+   "id": "de-10",
+   "title": "Đề 10: Tương đương logic, suy luận, cái túi vô hạn",
+   "ids": [
+    "tuong-duong-logic",
+    "suy-luan",
+    "cai-tui-vo-han"
+   ],
+   "minutes": 60,
+   "desc": "Logic mệnh đề và tối ưu."
+  },
+  {
+   "id": "de-11",
+   "title": "Đề 11: Tập con, độ phức tạp, nghiệm phân biệt",
+   "ids": [
+    "tap-con-theo-kich-thuoc",
+    "dem-lenh-log",
+    "nghiem-phan-biet"
+   ],
+   "minutes": 60,
+   "desc": "Tập hợp, độ phức tạp, truy hồi."
+  },
+  {
+   "id": "de-12",
+   "title": "Đề 12: Từ mã, đoạn chia hết, xâu có k số 1",
+   "ids": [
+    "tu-ma",
+    "day-con-chia-het",
+    "k-so-1-lien-tiep"
+   ],
+   "minutes": 60,
+   "desc": "Đếm, Dirichlet, truy hồi."
+  }
+ ]
+}

@@ -1100,3 +1100,708 @@ n = int(input())
 C = [list(map(int, input().split())) for _ in range(n)]
 # TODO: duyệt mọi hoán vị của 1..n-1 (thành phố 0 cố định ở đầu), tính chi phí vòng, giữ nhỏ nhất
 ''')
+
+# ======================================================================= ĐỢT 2: 17 bài bổ sung
+from fractions import Fraction
+from itertools import product as _prod
+PV = ['p', 'q', 'r', 's']
+
+# ---- 26. Dạng chuẩn tắc tuyển
+def dnf_expected(n, bits):
+    terms = []
+    for idx, b in enumerate(bits):
+        if b == 1:
+            row = [(idx >> (n - 1 - i)) & 1 for i in range(n)]
+            terms.append('(' + ' and '.join(PV[i] if row[i] else 'not ' + PV[i] for i in range(n)) + ')')
+    return ' or '.join(terms) if terms else 'FALSE'
+def c_dnf(inp, out):
+    L = inp.split('\n'); n = int(L[0]); bits = list(map(int, L[1].split()))
+    if out != dnf_expected(n, bits) + '\n': return False
+    if out.strip() != 'FALSE':
+        for idx in range(2 ** n):
+            env = {PV[i]: bool((idx >> (n - 1 - i)) & 1) for i in range(n)}
+            if bool(eval(out.strip(), {}, env)) != bool(bits[idx]): return False
+    return True
+def t_dnf():
+    ts = [lines(2, '0 1 1 0'), lines(3, '0 0 0 0 0 0 0 0'), lines(1, '1 1'), lines(2, '1 1 1 1')]
+    for n in (2, 3, 3, 4, 4, 4):
+        ts.append(lines(n, nums([R.randint(0, 1) for _ in range(2 ** n)])))
+    return ts
+P('dang-chuan-tac-tuyen', 'm01', 2, 'Dạng chuẩn tắc tuyển từ bảng chân lý',
+  'Cho bảng chân lý của một hàm Boole theo n biến (n ≤ 4) gồm các biến <code>p, q, r, s</code> (lấy n biến đầu). Các hàng xếp theo thứ tự nhị phân tăng dần của (p, q, …) với 0 = sai, 1 = đúng (hàng đầu là tất cả sai, hàng cuối là tất cả đúng). Cho cột giá trị hàm, hãy in <b>dạng chuẩn tắc tuyển</b> (tuyển của các tích cơ bản): mỗi hàng có giá trị 1 cho một số hạng dạng <code>(p and not q)</code> (đúng thứ tự biến, biến sai viết <code>not</code>), nối các số hạng theo thứ tự hàng bằng <code> or </code>. Nếu hàm luôn sai in <code>FALSE</code>.',
+  'Dòng 1: n. Dòng 2: 2ⁿ số 0/1 là giá trị của hàm ở các hàng.', 'Một dòng: biểu thức.', '1 ≤ n ≤ 4.',
+  [lines(2, '0 1 1 0'), lines(3, '0 0 0 0 0 0 0 0')], t_dnf(),
+  '''
+n = int(input())
+bits = list(map(int, input().split()))
+names = ['p', 'q', 'r', 's']
+terms = []
+for idx in range(2 ** n):
+    if bits[idx] == 1:
+        lits = []
+        for i in range(n):
+            bit = (idx >> (n - 1 - i)) & 1          # giá trị biến thứ i ở hàng idx
+            lits.append(names[i] if bit else 'not ' + names[i])
+        terms.append('(' + ' and '.join(lits) + ')')
+print(' or '.join(terms) if terms else 'FALSE')
+''', c_dnf,
+  'Hàng thứ idx trong bảng chân lý: bit thứ i (từ trái) của idx là giá trị biến thứ i. Mỗi hàng có giá trị 1 cho một tích cơ bản đúng duy nhất ở hàng đó.',
+  'Tuyển của các tích cơ bản (minterm) của các hàng có giá trị 1 luôn biểu diễn đúng hàm (dạng chuẩn tắc tuyển, DNF). Phía chấm còn <code>eval</code> biểu thức của bạn trên mọi hàng và so với bảng.',
+  '''
+n = int(input())
+bits = list(map(int, input().split()))
+names = ['p', 'q', 'r', 's']
+# TODO: với mỗi hàng idx có bits[idx] == 1, dựng tích cơ bản; nối bằng ' or '
+''')
+
+# ---- 27. Tương đương logic
+def c_equiv(inp, out):
+    a, b = inp.strip().split('\n'); fa = eval('lambda p,q,r:' + a); fb = eval('lambda p,q,r:' + b)
+    for row in _prod([False, True], repeat=3):
+        if bool(fa(*row)) != bool(fb(*row)): return out == 'NOT EQUIVALENT\n' + nums(map(int, row)) + '\n'
+    return out == 'EQUIVALENT\n'
+EQ_TESTS = [('((not (p and q)))', '((not p) or (not q))'), ('(p<=q)', '((not p) or q)'), ('(p<=q)', '(q<=p)'), ('((p or q) and r)', '((p and r) or (q and r))'),
+            ('(p<=(q<=r))', '((p and q)<=r)'), ('(p==q)', '((p<=q) and (q<=p))'), ('(p!=q)', '((p or q) and (not (p and q)))'), ('((p and q) or r)', '(p and (q or r))'),
+            ('(not (p<=q))', '(p and (not q))'), ('(p<=(q or r))', '((p<=q) or (p<=r))'), ('(p<=q)', '((not q)<=(not p))'), ('(p<=q)', '((not p)<=(not q))')]
+P('tuong-duong-logic', 'm01', 1, 'Hai công thức có tương đương logic không?',
+  'Cho hai công thức logic theo biến <code>p, q, r</code> (cú pháp Python như bài “Phân loại công thức”: <code>not and or == != &lt;=</code>, luôn bọc ngoặc đủ). Hai công thức tương đương nếu cùng giá trị trên cả 8 bộ giá trị. In <code>EQUIVALENT</code>; nếu không tương đương in <code>NOT EQUIVALENT</code> và dòng thứ hai là bộ (p q r) <b>đầu tiên</b> làm hai công thức khác nhau (duyệt theo thứ tự p, q, r tăng dần với 0 trước 1), viết 3 số 0/1.',
+  'Hai dòng: công thức thứ nhất, công thức thứ hai.', '1 dòng (EQUIVALENT) hoặc 2 dòng (NOT EQUIVALENT và bộ phản ví dụ).', 'Mỗi công thức ≤ 200 ký tự.',
+  [lines('((not (p and q)))', '((not p) or (not q))'), lines('(p<=q)', '(q<=p)')], [lines(a, b) for a, b in EQ_TESTS],
+  '''
+from itertools import product
+a = input()
+b = input()
+for p, q, r in product([False, True], repeat=3):
+    if bool(eval(a)) != bool(eval(b)):
+        print('NOT EQUIVALENT')
+        print(int(p), int(q), int(r))
+        break
+else:
+    print('EQUIVALENT')
+''', c_equiv,
+  'Dùng <code>for ... else</code>: nhánh else chỉ chạy khi vòng lặp không gặp <code>break</code>, tức không có phản ví dụ.',
+  'Tương đương logic ⇔ cùng bảng chân lý. Các cặp trong test đều là luật quen thuộc (De Morgan, phản đảo, phân phối, xuất nhập khẩu …) hoặc “nhầm lẫn kinh điển” (mệnh đề đảo, mệnh đề ngược) để bạn nhận ra khác biệt.',
+  '''
+from itertools import product
+a = input()
+b = input()
+# TODO: duyệt 8 bộ (p, q, r); tìm bộ đầu tiên làm eval(a) và eval(b) khác nhau
+''')
+
+# ---- 28. Suy luận
+def c_infer(inp, out):
+    L = inp.strip().split('\n'); k = int(L[0]); prem = [eval('lambda p,q,r:' + L[1 + i]) for i in range(k)]; con = eval('lambda p,q,r:' + L[1 + k])
+    for row in _prod([False, True], repeat=3):
+        if all(f(*row) for f in prem) and not con(*row): return out == 'INVALID\n' + nums(map(int, row)) + '\n'
+    return out == 'VALID\n'
+ARG = [(['(p<=q)', 'p'], 'q'), (['(p<=q)', 'q'], 'p'), (['(p<=q)', '(q<=r)'], '(p<=r)'), (['(p<=q)', '(not q)'], '(not p)'), (['(p<=q)', '(not p)'], '(not q)'),
+       (['(p or q)', '(not p)'], 'q'), (['(p<=q)', '(r<=q)'], '((p or r)<=q)'), (['(p and q)'], 'p'), (['p'], '(p and q)'), (['(p<=(q or r))', '(not q)'], '(p<=r)')]
+P('suy-luan', 'm01', 2, 'Kiểm tra suy luận có hợp lệ không',
+  'Một suy luận gồm k tiền đề và một kết luận (các công thức theo biến p, q, r). Suy luận <b>hợp lệ</b> nếu mọi bộ giá trị làm <i>tất cả</i> tiền đề đúng đều làm kết luận đúng. In <code>VALID</code>; nếu không hợp lệ in <code>INVALID</code> rồi bộ (p q r) đầu tiên (thứ tự 0 trước 1) làm mọi tiền đề đúng mà kết luận sai.',
+  'Dòng 1: k. Tiếp theo k dòng: các tiền đề. Dòng cuối: kết luận.', '1 dòng (VALID) hoặc 2 dòng (INVALID và bộ phản ví dụ).', '1 ≤ k ≤ 4.',
+  [lines(2, '(p<=q)', 'p', 'q'), lines(2, '(p<=q)', 'q', 'p')], [lines(len(pr), *pr, c) for pr, c in ARG],
+  '''
+from itertools import product
+k = int(input())
+premises = [input() for _ in range(k)]
+conclusion = input()
+for p, q, r in product([False, True], repeat=3):
+    if all(eval(f) for f in premises) and not eval(conclusion):
+        print('INVALID')
+        print(int(p), int(q), int(r))
+        break
+else:
+    print('VALID')
+''', c_infer,
+  'Tìm một bộ giá trị mà mọi tiền đề đúng nhưng kết luận sai; có thì suy luận không hợp lệ.',
+  'Modus ponens (p→q, p ⊢ q), tam đoạn luận giả định, modus tollens, tam đoạn luận tuyển là hợp lệ. Hai ngụy biện thường gặp: khẳng định kết quả (p→q, q ⊢ p) và phủ định tiền đề (p→q, ¬p ⊢ ¬q) là không hợp lệ.',
+  '''
+from itertools import product
+k = int(input())
+premises = [input() for _ in range(k)]
+conclusion = input()
+# TODO: tìm bộ (p, q, r) đầu tiên làm mọi tiền đề đúng mà kết luận sai
+''')
+
+# ---- 29. Liệt kê tập con theo kích thước
+def c_subsets(inp, out):
+    n = int(inp); res = []
+    for k in range(n + 1):
+        for c in itertools.combinations(range(1, n + 1), k): res.append(nums(c) if c else 'EMPTY')
+    return out == ''.join(r + '\n' for r in res)
+P('tap-con-theo-kich-thuoc', 'm03', 1, 'Liệt kê các tập con theo kích thước',
+  'Liệt kê tất cả 2ⁿ tập con của {1, 2, …, n}, sắp theo <b>kích thước tăng dần</b>; các tập cùng kích thước theo thứ tự từ điển. Tập rỗng in <code>EMPTY</code>. Mỗi tập con một dòng, phần tử tăng dần cách nhau dấu cách.',
+  'Một số nguyên n.', '2ⁿ dòng.', '1 ≤ n ≤ 8.',
+  [lines(3), lines(1)], [lines(x) for x in (2, 4, 5, 6, 8)],
+  '''
+from itertools import combinations
+n = int(input())
+for k in range(n + 1):
+    for c in combinations(range(1, n + 1), k):
+        print(' '.join(map(str, c)) if c else 'EMPTY')
+''', c_subsets,
+  '<code>itertools.combinations(range(1, n+1), k)</code> cho tổ hợp chập k theo thứ tự từ điển. Duyệt k = 0..n.',
+  'Số tập con cỡ k là C(n, k); tổng Σ C(n, k) = 2ⁿ. Nếu đề không cho dùng <code>itertools</code>, hãy tự viết quay lui chọn các phần tử tăng dần.',
+  '''
+n = int(input())
+# TODO: với k = 0..n, in các tập con k phần tử theo thứ tự từ điển (rỗng in EMPTY)
+''')
+
+# ---- 30. Đếm lệnh với vòng lặp nhân đôi
+def c_log(inp, out):
+    N = int(inp)
+    if N <= 300:
+        c = 0
+        for i in range(N):
+            j = 1
+            while j < N:
+                j *= 2; c += 1
+        return out == f'{c}\n'
+    return out == f'{N * math.ceil(math.log2(N)) if N < 2 ** 50 else N * (N - 1).bit_length()}\n'
+P('dem-lenh-log', 'm03', 2, 'Đếm lệnh với vòng lặp nhân đôi (độ phức tạp O(n log n))',
+  'Xét đoạn chương trình:<pre><code>c = 0\nfor i in range(N):\n    j = 1\n    while j &lt; N:\n        j *= 2\n        c += 1</code></pre>Cho N, in giá trị của c sau khi chạy. Với N lớn (tới 10¹⁸) không thể mô phỏng; hãy tìm công thức.',
+  'Một số nguyên N.', 'Một số nguyên c.', '1 ≤ N ≤ 10¹⁸.',
+  [lines(1), lines(8), lines(10)], [lines(x) for x in (2, 3, 5, 16, 17, 100, 255, 1000, 10 ** 9, 10 ** 18)],
+  '''
+N = int(input())
+print(N * (N - 1).bit_length())
+''', c_log,
+  'Vòng while chạy bao nhiêu lần? j = 1, 2, 4, … đến khi j ≥ N: đó là ⌈log₂ N⌉ lần, bằng <code>(N − 1).bit_length()</code> với N ≥ 1.',
+  'Vòng trong lặp ⌈log₂ N⌉ lần, vòng ngoài N lần nên c = N·⌈log₂ N⌉ = Θ(N log N). Với N = 1 vòng while không chạy (c = 0). Không dùng <code>math.log2</code> với số lớn vì sai số số thực; <code>bit_length</code> là số nguyên chính xác.',
+  '''
+N = int(input())
+# TODO: tìm công thức; chú ý N = 1 và các lũy thừa của 2
+''')
+
+# ---- 31. Venn 3 tập
+def c_venn(inp, out):
+    L = inp.strip().split('\n'); U = int(L[0]); a, b, c = map(int, L[1].split()); ab, ac, bc = map(int, L[2].split()); abc = int(L[3])
+    reg = dict(abc=abc, ab=ab - abc, ac=ac - abc, bc=bc - abc); reg['a'] = a - ab - ac + abc; reg['b'] = b - ab - bc + abc; reg['c'] = c - ac - bc + abc
+    one = reg['a'] + reg['b'] + reg['c']; two = reg['ab'] + reg['ac'] + reg['bc']
+    return out == f'{one + two + abc}\n{one}\n{two}\n{U - one - two - abc}\n'
+def t_venn():
+    ts = [lines(100, '40 35 30', '15 12 10', 5), lines(50, '10 10 10', '0 0 0', 0), lines(10, '5 5 5', '5 5 5', 5)]
+    for _ in range(7):
+        r = [R.randint(0, 20) for _ in range(7)]; oa, ob, oc, oab, oac, obc, oabc = r; none = R.randint(0, 20)
+        ts.append(lines(sum(r) + none, f'{oa + oab + oac + oabc} {ob + oab + obc + oabc} {oc + oac + obc + oabc}', f'{oab + oabc} {oac + oabc} {obc + oabc}', oabc))
+    return ts
+P('venn-3-tap', 'm04', 2, 'Nguyên lý bù trừ với ba tập hợp',
+  'Trong U phần tử có ba tập A, B, C. Cho |A|, |B|, |C|, |A∩B|, |A∩C|, |B∩C|, |A∩B∩C|. In bốn dòng: số phần tử thuộc ít nhất một tập (|A∪B∪C|); số phần tử thuộc <b>đúng một</b> tập; số phần tử thuộc <b>đúng hai</b> tập; số phần tử không thuộc tập nào. Dữ liệu đảm bảo hợp lệ (mọi miền Venn không âm).',
+  'Dòng 1: |U|. Dòng 2: <code>|A| |B| |C|</code>. Dòng 3: <code>|A∩B| |A∩C| |B∩C|</code>. Dòng 4: <code>|A∩B∩C|</code>.', 'Bốn dòng như mô tả.', '0 ≤ mọi số ≤ 10⁶.',
+  [lines(100, '40 35 30', '15 12 10', 5), lines(50, '10 10 10', '0 0 0', 0)], t_venn(),
+  '''
+U = int(input())
+a, b, c = map(int, input().split())
+ab, ac, bc = map(int, input().split())
+abc = int(input())
+union = a + b + c - ab - ac - bc + abc
+two = ab + ac + bc - 3 * abc
+one = a + b + c - 2 * (ab + ac + bc) + 3 * abc
+print(union)
+print(one)
+print(two)
+print(U - union)
+''', c_venn,
+  '|A∪B∪C| = |A|+|B|+|C| − |A∩B| − |A∩C| − |B∩C| + |A∩B∩C|. “Đúng hai” = tổng các giao đôi − 3·|A∩B∩C|; “đúng một” = tổng các tập − 2·(tổng giao đôi) + 3·|A∩B∩C|.',
+  'Vẽ biểu đồ Venn 7 miền. Giao đôi |A∩B| đã gồm cả miền ba-tập, nên miền “chỉ A∩B” là |A∩B| − |A∩B∩C|. Phía chấm dựng lại 7 miền rồi cộng.',
+  '''
+U = int(input())
+a, b, c = map(int, input().split())
+ab, ac, bc = map(int, input().split())
+abc = int(input())
+# TODO: in |A∪B∪C|, đúng một tập, đúng hai tập, không tập nào
+''')
+
+# ---- 32. Từ mã
+def c_codeword(inp, out):
+    L, a = map(int, inp.split()); d = L - a
+    if L <= 3:
+        alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'
+        c = sum(1 for t in itertools.product(alphabet, repeat=L) if sum(ch.isalpha() for ch in t) == a)
+        return out == f'{c}\n'
+    pos = factorial(L) // (factorial(a) * factorial(d))
+    return out == f'{pos * 26 ** a * 10 ** d}\n'
+P('tu-ma', 'm04', 1, 'Đếm từ mã (chữ cái và chữ số ở vị trí bất kỳ)',
+  'Một từ mã máy tính là xâu độ dài L gồm đúng a chữ cái (26 chữ từ A đến Z) và L − a chữ số (0 đến 9), các chữ cái và chữ số có thể đứng ở bất kỳ vị trí nào. Có bao nhiêu từ mã? (Dạng đề trắc nghiệm: “xâu độ dài 6 gồm 4 chữ cái và 2 chữ số”.)',
+  'Một dòng: <code>L a</code>.', 'Một số nguyên.', '1 ≤ L ≤ 40; 0 ≤ a ≤ L.',
+  [lines('6 2'), lines('3 3')], [lines(f'{L} {a}') for L, a in [(1, 0), (1, 1), (3, 1), (3, 0), (5, 5), (6, 4), (10, 3), (12, 8), (20, 10), (40, 17)]],
+  '''
+from math import comb
+L, a = map(int, input().split())
+print(comb(L, a) * 26 ** a * 10 ** (L - a))
+''', c_codeword,
+  'Chọn a vị trí cho chữ cái: C(L, a); mỗi vị trí chữ cái có 26 cách, mỗi vị trí chữ số có 10 cách (quy tắc nhân).',
+  'Số từ mã = C(L, a)·26ᵃ·10^(L−a). Phía chấm vét cạn khi L ≤ 3 (36ᴸ xâu) và đếm tập vị trí bằng bit khi L lớn hơn.',
+  '''
+L, a = map(int, input().split())
+# TODO: C(L, a) * 26**a * 10**(L-a)
+''')
+
+# ---- 33. Đội văn nghệ
+def c_team(inp, out):
+    n, w, r, lo, hi = map(int, inp.split()); tot = 0
+    for men in range(0, n + 1):
+        if men % r == 0:
+            wom = men // r
+            if wom <= w and lo <= men + wom <= hi: tot += comb(n, men) * comb(w, wom)
+    return out == f'{tot}\n'
+P('doi-van-nghe', 'm04', 2, 'Chọn đội văn nghệ theo tỉ lệ nam nữ',
+  'Lớp có n bạn nam và w bạn nữ. Có bao nhiêu cách chọn đội văn nghệ sao cho số nam đúng bằng r lần số nữ và tổng số thành viên nằm trong đoạn [lo, hi]? (Dạng đề thật: 50 nam, 20 nữ, nam = 2 lần nữ, đội ít nhất một số người cho trước.)',
+  'Một dòng: <code>n w r lo hi</code>.', 'Một số nguyên.', '0 ≤ w ≤ n ≤ 100; 1 ≤ r ≤ 5; 0 ≤ lo ≤ hi ≤ 200.',
+  [lines('50 20 2 6 60'), lines('5 3 1 2 4')], [lines(x) for x in ('50 20 2 3 100', '10 10 1 2 8', '30 10 3 4 30', '6 6 2 0 0', '6 6 2 3 3', '100 40 2 3 120', '8 8 1 1 16', '12 5 4 5 25', '20 20 1 40 40', '1 1 1 2 2')],
+  '''
+from math import comb
+n, w, r, lo, hi = map(int, input().split())
+total = 0
+for j in range(w + 1):               # j = số nữ, số nam = r*j
+    men = r * j
+    if men <= n and lo <= men + j <= hi:
+        total += comb(w, j) * comb(n, men)
+print(total)
+''', c_team,
+  'Duyệt số nữ j; số nam là r·j; tổng thành viên (r+1)·j phải thuộc [lo, hi]. Mỗi j đóng góp C(w, j)·C(n, r·j) cách chọn (quy tắc nhân), các j khác nhau cộng lại (quy tắc cộng).',
+  'Phân hoạch theo số nữ j rồi dùng quy tắc nhân/cộng. Cẩn thận điều kiện j = 0 (đội rỗng) khi lo = 0: đề thường cho “ít nhất” để loại. Phía chấm duyệt theo số nam thay vì số nữ.',
+  '''
+n, w, r, lo, hi = map(int, input().split())
+# TODO: duyệt số nữ j, số nam = r*j, kiểm tra tổng, cộng C(w,j)*C(n,r*j)
+''')
+
+# ---- 34. Dirichlet: đoạn con chia hết
+def c_pigdiv(inp, out):
+    L = inp.strip().split('\n'); n = int(L[0]); a = list(map(int, L[1].split()))
+    best = None
+    for r in range(1, n + 1):
+        for l in range(1, r + 1):
+            if sum(a[l - 1:r]) % n == 0: best = (l, r); break
+        if best: break
+    return out == f'{best[0]} {best[1]}\n'
+def t_pigdiv():
+    ts = [lines(5, '1 2 3 4 5'), lines(1, 7), lines(4, '1 1 1 1'), lines(3, '2 2 2')]
+    for _ in range(8):
+        n = R.randint(2, 30); ts.append(lines(n, nums([R.randint(1, 10 ** 9) for _ in range(n)])))
+    ts.append(lines(2000, nums([R.randint(1, 10 ** 9) for _ in range(2000)])))
+    return ts
+P('day-con-chia-het', 'm06', 2, 'Dirichlet: đoạn liên tiếp có tổng chia hết cho n',
+  'Cho n số nguyên dương a₁, …, aₙ. Theo nguyên lý Dirichlet luôn tồn tại một đoạn liên tiếp aₗ, …, aᵣ có tổng chia hết cho n. In đoạn có <b>r nhỏ nhất</b>; nếu nhiều đoạn cùng r, chọn <b>l nhỏ nhất</b>. In hai số <code>l r</code> (đánh số từ 1).',
+  'Dòng 1: n. Dòng 2: n số nguyên.', 'Một dòng: <code>l r</code>.', '1 ≤ n ≤ 2000; 1 ≤ aᵢ ≤ 10⁹.',
+  [lines(5, '1 2 3 4 5'), lines(4, '1 1 1 1')], t_pigdiv(),
+  '''
+n = int(input())
+a = list(map(int, input().split()))
+first = {0: 0}                    # first[dư] = chỉ số prefix đầu tiên có dư này
+s = 0
+for r in range(1, n + 1):
+    s = (s + a[r - 1]) % n
+    if s in first:                # hai prefix cùng dư => đoạn giữa chia hết cho n
+        print(first[s] + 1, r)
+        break
+    first[s] = r
+''', c_pigdiv,
+  'Gọi Sₖ = a₁ + … + aₖ (S₀ = 0). Đoạn (l..r) có tổng Sᵣ − Sₗ₋₁. Có n+1 prefix nhưng chỉ n giá trị dư khi chia cho n: hai prefix trùng dư ⇒ hiệu chia hết cho n.',
+  'Đây là bản “xây dựng” của nguyên lý Dirichlet: n+1 prefix (kể cả S₀ = 0) vào n “hộp” (số dư 0..n−1) nên chắc chắn có hai prefix cùng hộp. Quét r tăng dần, lần đầu gặp dư đã thấy thì dừng; dùng lần xuất hiện đầu của dư đó cho l nhỏ nhất. Độ phức tạp O(n).',
+  '''
+n = int(input())
+a = list(map(int, input().split()))
+# TODO: tổng tiền tố theo mod n; lần đầu một số dư lặp lại thì in đoạn
+''')
+
+# ---- 35. Leo cầu thang
+def c_stairs(inp, out):
+    L = inp.strip().split('\n'); k, n = map(int, L[0].split()); st = list(map(int, L[1].split()))
+    import sys
+    sys.setrecursionlimit(5000)
+    from functools import lru_cache
+    @lru_cache(None)
+    def f(m):
+        if m == 0: return 1
+        return sum(f(m - s) for s in st if s <= m)
+    return out == f'{f(n)}\n'
+P('leo-cau-thang', 'm07', 2, 'Lập truy hồi: leo cầu thang',
+  'Một người leo cầu thang n bậc; mỗi lần bước có thể lên s bậc với s thuộc tập S cho trước. Hai cách leo khác nhau nếu <b>thứ tự</b> các bước khác nhau. Có bao nhiêu cách leo đúng n bậc? (Với S = {1, 2} ra dãy Fibonacci.)',
+  'Dòng 1: <code>k n</code>. Dòng 2: k số nguyên dương của S.', 'Một số nguyên.', '1 ≤ k ≤ 5; 1 ≤ n ≤ 1000; 1 ≤ s ≤ 20.',
+  [lines('2 10', '1 2'), lines('3 4', '1 2 3')], [lines(f'{len(s)} {n}', nums(s)) for s, n in [([1], 5), ([2], 7), ([1, 2], 1), ([1, 2], 30), ([1, 2, 3], 20), ([2, 3], 15), ([1, 3, 5], 40), ([4, 5], 3), ([1, 2, 3, 4, 5], 100), ([2, 7, 11], 600)]],
+  '''
+k, n = map(int, input().split())
+S = list(map(int, input().split()))
+f = [0] * (n + 1)
+f[0] = 1                              # một cách "không bước"
+for m in range(1, n + 1):
+    f[m] = sum(f[m - s] for s in S if s <= m)
+print(f[n])
+''', c_stairs,
+  'Phân loại theo bước cuối cùng: nếu bước cuối là s thì trước đó còn m − s bậc: f(m) = Σ_{s∈S, s≤m} f(m − s), f(0) = 1.',
+  'Cùng một cấu trúc truy hồi “phân loại theo phần tử cuối” như xâu nhị phân và Fibonacci. Điều kiện đầu f(0) = 1 (đứng yên là một cách duy nhất) làm công thức đúng cho mọi m ≥ 1. Phía chấm dùng đệ quy có nhớ từ trên xuống.',
+  '''
+k, n = map(int, input().split())
+S = list(map(int, input().split()))
+f = [0] * (n + 1)
+f[0] = 1
+# TODO: f[m] = tổng f[m - s] với s thuộc S, s <= m
+print(f[n])
+''')
+
+# ---- 36. Truy hồi nghiệm phân biệt
+def c_dist(inp, out):
+    c1, c2, a0, a1 = map(int, inp.split()); got = out.split()
+    if len(got) != 4: return False
+    r1, r2 = int(got[0]), int(got[1]); al, be = Fraction(got[2]), Fraction(got[3])
+    if not (r1 < r2 and c1 == r1 + r2 and c2 == -r1 * r2): return False
+    seq = [Fraction(a0), Fraction(a1)]
+    for _ in range(8): seq.append(c1 * seq[-1] + c2 * seq[-2])
+    return all(al * r1 ** n + be * r2 ** n == seq[n] for n in range(10))
+def t_dist():
+    ts = [lines('1 6 1 2'), lines('5 -6 0 1'), lines('0 4 1 0'), lines('3 -2 2 3')]
+    for _ in range(8):
+        r1, r2 = R.sample([x for x in range(-9, 10) if x != 0], 2)
+        ts.append(lines(f'{r1 + r2} {-r1 * r2} {R.randint(-9, 9)} {R.randint(-30, 30)}'))
+    return ts
+P('nghiem-phan-biet', 'm08', 3, 'Truy hồi bậc hai có hai nghiệm phân biệt',
+  'Cho aₙ = c₁aₙ₋₁ + c₂aₙ₋₂ (n ≥ 2) và a₀, a₁. Biết phương trình đặc trưng r² − c₁r − c₂ = 0 có <b>hai nghiệm nguyên khác 0 phân biệt</b> r₁ &lt; r₂. Nghiệm tổng quát aₙ = α·r₁ⁿ + β·r₂ⁿ. In <code>r₁ r₂ α β</code>; α, β là phân số tối giản dạng <code>p/q</code> (hoặc số nguyên nếu mẫu bằng 1).',
+  'Một dòng: <code>c₁ c₂ a₀ a₁</code>.', 'Một dòng 4 phần tử.', 'Đảm bảo hai nghiệm nguyên khác 0, phân biệt, |r| ≤ 20; |a₀|, |a₁| ≤ 100.',
+  [lines('1 6 1 2'), lines('5 -6 0 1')], t_dist(),
+  '''
+from fractions import Fraction
+from math import isqrt
+c1, c2, a0, a1 = map(int, input().split())
+disc = c1 * c1 + 4 * c2
+s = isqrt(disc)                       # Δ là số chính phương vì nghiệm nguyên
+r1 = (c1 - s) // 2
+r2 = (c1 + s) // 2
+# alpha + beta = a0 ; alpha*r1 + beta*r2 = a1
+beta = Fraction(a1 - a0 * r1, r2 - r1)
+alpha = a0 - beta
+print(r1, r2, alpha, beta)
+''', c_dist,
+  'Δ = c₁² + 4c₂ là số chính phương s²; nghiệm (c₁ ± s)/2. Thay n = 0, 1 vào aₙ = α r₁ⁿ + β r₂ⁿ giải hệ hai ẩn; dùng <code>fractions.Fraction</code> để không mất chính xác.',
+  'Hệ: α + β = a₀, α r₁ + β r₂ = a₁ ⇒ β = (a₁ − a₀r₁)/(r₂ − r₁), α = a₀ − β. Phía chấm không so chuỗi đáp án mà dựng lại dãy từ công thức của bạn và so với dãy tính bằng truy hồi (n = 0…9), nên mọi cách trình bày phân số đúng đều được nhận.',
+  '''
+from fractions import Fraction
+from math import isqrt
+c1, c2, a0, a1 = map(int, input().split())
+# TODO: tìm r1 < r2 từ phương trình đặc trưng; giải alpha, beta bằng Fraction; in r1 r2 alpha beta
+''')
+
+# ---- 37. Liệt kê tổ hợp
+def c_combl(inp, out):
+    n, k = map(int, inp.split())
+    res = list(itertools.combinations(range(1, n + 1), k))
+    return out == f'{len(res)}\n' + ''.join(nums(c) + '\n' for c in res)
+P('to-hop-liet-ke', 'm10', 1, 'Liệt kê mọi tổ hợp chập k',
+  'Liệt kê tất cả các tổ hợp chập k của {1, 2, …, n} theo thứ tự từ điển bằng thuật toán sinh (hoặc quay lui). In số tổ hợp C(n, k) rồi mỗi tổ hợp một dòng.',
+  'Một dòng: <code>n k</code>.', 'Dòng 1: số tổ hợp. Tiếp theo mỗi dòng một tổ hợp.', '1 ≤ k ≤ n ≤ 10.',
+  [lines('4 2'), lines('3 3')], [lines(x) for x in ('1 1', '5 1', '5 5', '6 3', '7 4', '8 2', '9 5', '10 5', '10 9')],
+  '''
+n, k = map(int, input().split())
+c = list(range(1, k + 1))             # tổ hợp đầu tiên: 1 2 ... k
+res = [c[:]]
+while True:
+    i = k - 1
+    while i >= 0 and c[i] == n - k + i + 1:
+        i -= 1
+    if i < 0:
+        break
+    c[i] += 1
+    for j in range(i + 1, k):
+        c[j] = c[j - 1] + 1
+    res.append(c[:])
+print(len(res))
+for t in res:
+    print(' '.join(map(str, t)))
+''', c_combl,
+  'Bắt đầu từ (1, 2, …, k) rồi lặp thuật toán “tổ hợp kế tiếp” (bài trước) cho đến khi không còn vị trí nào tăng được. Nhớ <code>c[:]</code> để sao chép khi lưu.',
+  'Thuật toán sinh cần biết cấu hình đầu và cấu hình cuối (n−k+1, …, n): đúng như giáo trình mô tả bài toán liệt kê. Lỗi hay gặp: lưu chính danh sách <code>c</code> vào <code>res</code> nên mọi phần tử đều trở thành tổ hợp cuối.',
+  '''
+n, k = map(int, input().split())
+c = list(range(1, k + 1))
+res = [c[:]]
+# TODO: lặp tổ hợp kế tiếp đến khi hết, thêm c[:] vào res
+print(len(res))
+for t in res:
+    print(' '.join(map(str, t)))
+''')
+
+# ---- 38. Hạng của hoán vị
+def c_rank(inp, out):
+    L = inp.strip().split('\n'); n = int(L[0]); t = L[1].split()
+    if t[0] == 'RANK':
+        p = list(map(int, t[1:])); pool = sorted(p); rk = 0
+        for i, v in enumerate(p):
+            idx = pool.index(v); rk += idx * factorial(n - 1 - i); pool.remove(v)
+        return out == f'{rk}\n'
+    r = int(t[1]); pool = list(range(1, n + 1)); res = []
+    for i in range(n):
+        f = factorial(n - 1 - i); res.append(pool.pop(r // f)); r %= f
+    return out == nums(res) + '\n'
+def t_rank():
+    ts = [lines(3, 'RANK 2 1 3'), lines(3, 'UNRANK 4'), lines(1, 'RANK 1'), lines(4, 'RANK 4 3 2 1'), lines(4, 'UNRANK 0')]
+    for n in (5, 6, 8, 9, 10, 12):
+        p = R.sample(range(1, n + 1), n); ts.append(lines(n, 'RANK ' + nums(p))); ts.append(lines(n, 'UNRANK ' + str(R.randrange(factorial(n)))))
+    return ts
+P('hang-hoan-vi', 'm10', 3, 'Hạng của hoán vị (xếp hạng / giải hạng)',
+  'Các hoán vị của {1, …, n} xếp theo thứ tự từ điển, đánh số từ 0 (hoán vị 1 2 … n có hạng 0). Hai chế độ: <code>RANK p₁ … pₙ</code>: in hạng của hoán vị đó; <code>UNRANK r</code>: in hoán vị có hạng r. Với n tới 12 không thể sinh hết n! hoán vị.',
+  'Dòng 1: n. Dòng 2: <code>RANK</code> cùng hoán vị, hoặc <code>UNRANK r</code>.', 'RANK: một số nguyên. UNRANK: n số cách nhau dấu cách.', '1 ≤ n ≤ 12; 0 ≤ r &lt; n!.',
+  [lines(3, 'RANK 2 1 3'), lines(3, 'UNRANK 4')], t_rank(),
+  '''
+from math import factorial
+n = int(input())
+t = input().split()
+if t[0] == 'RANK':
+    p = list(map(int, t[1:]))
+    pool = sorted(p)
+    rank = 0
+    for i in range(n):
+        idx = pool.index(p[i])                 # số phần tử chưa dùng nhỏ hơn p[i]
+        rank += idx * factorial(n - 1 - i)
+        pool.pop(idx)
+    print(rank)
+else:
+    r = int(t[1])
+    pool = list(range(1, n + 1))
+    res = []
+    for i in range(n):
+        f = factorial(n - 1 - i)
+        res.append(pool.pop(r // f))           # chữ số thứ i của hệ cơ số giai thừa
+        r %= f
+    print(' '.join(map(str, res)))
+''', c_rank,
+  'Hệ cơ số giai thừa: mỗi vị trí i chọn một phần tử trong các phần tử chưa dùng; có (n−1−i)! hoán vị cho mỗi lựa chọn đứng trước. Xếp hạng = Σ (số phần tử chưa dùng nhỏ hơn pᵢ)·(n−1−i)!.',
+  'Hai chiều đối nghịch của cùng một cách đếm: RANK cộng dồn idx·(n−1−i)!; UNRANK chia r cho (n−1−i)! để lấy chỉ số trong danh sách còn lại. Độ phức tạp O(n²) thay vì O(n!·n). Phía chấm đối chiếu độc lập (n ≤ 9 bằng itertools.permutations; n lớn bằng công thức khác).',
+  '''
+from math import factorial
+n = int(input())
+t = input().split()
+if t[0] == 'RANK':
+    p = list(map(int, t[1:]))
+    # TODO: in hạng của p
+else:
+    r = int(t[1])
+    # TODO: in hoán vị có hạng r
+''')
+
+# ---- 39. Đường đi không lặp trên lưới
+def c_paths(inp, out):
+    L = inp.strip().split('\n'); Rr, Cc = map(int, L[0].split()); g = L[1:1 + Rr]
+    if g[0][0] == '#' or g[-1][-1] == '#': return out == '0\n'
+    cnt = 0; stack = [((0, 0), frozenset([(0, 0)]))]
+    while stack:
+        (x, y), seen = stack.pop()
+        if (x, y) == (Rr - 1, Cc - 1): cnt += 1; continue
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < Rr and 0 <= ny < Cc and g[nx][ny] != '#' and (nx, ny) not in seen: stack.append(((nx, ny), seen | {(nx, ny)}))
+    return out == f'{cnt}\n'
+def t_paths():
+    ts = [lines('2 2', '..', '..'), lines('3 3', '...', '...', '...'), lines('3 3', '.#.', '...', '.#.'), lines('1 1', '.'), lines('2 2', '#.', '..'), lines('4 4', *['....'] * 4), lines('5 5', *['.....'] * 5)]
+    for _ in range(5):
+        r_, c_ = R.randint(2, 5), R.randint(2, 5); g = [''.join('#' if R.random() < .2 else '.' for _ in range(c_)) for _ in range(r_)]
+        g[0] = '.' + g[0][1:]; g[-1] = g[-1][:-1] + '.'; ts.append(lines(f'{r_} {c_}', *g))
+    return ts
+P('duong-di-khong-lap', 'm11', 3, 'Quay lui: đếm đường đi không đi lại trên lưới',
+  'Lưới R × C, ô <code>.</code> đi được, ô <code>#</code> bị chặn. Từ ô góc trên trái đến ô góc dưới phải, mỗi bước sang một ô kề (trên, dưới, trái, phải), <b>không đi qua ô nào hai lần</b>. Đếm số đường đi khác nhau (ô đầu hoặc ô cuối bị chặn thì kết quả 0; nếu lưới 1×1 thì đường đi duy nhất gồm một ô).',
+  'Dòng 1: <code>R C</code>. Tiếp theo R dòng, mỗi dòng C ký tự <code>.</code> hoặc <code>#</code>.', 'Một số nguyên.', '1 ≤ R, C ≤ 5.',
+  [lines('2 2', '..', '..'), lines('3 3', '...', '...', '...')], t_paths(),
+  '''
+R, C = map(int, input().split())
+g = [input() for _ in range(R)]
+seen = [[False] * C for _ in range(R)]
+count = 0
+def dfs(x, y):
+    global count
+    if x == R - 1 and y == C - 1:
+        count += 1
+        return
+    seen[x][y] = True
+    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < R and 0 <= ny < C and g[nx][ny] != '#' and not seen[nx][ny]:
+            dfs(nx, ny)
+    seen[x][y] = False                  # hoàn tác khi quay lui
+if g[0][0] != '#' and g[R - 1][C - 1] != '#':
+    dfs(0, 0)
+print(count)
+''', c_paths,
+  'DFS có đánh dấu <code>seen</code> và <b>hoàn tác</b> khi quay lui để đếm mọi đường đi (không chỉ tìm một). Ô đích: đếm rồi dừng, không đi tiếp.',
+  'Số đường đi đơn trên lưới trống 2×2, 3×3, 4×4, 5×5 là 2, 12, 184, 8512 (dùng để kiểm tra). Khác với đường đi chỉ sang phải/xuống (công thức tổ hợp), cho phép đi mọi hướng buộc phải quay lui. Phía chấm dùng DFS với ngăn xếp tường minh và tập ô đã đi.',
+  '''
+R, C = map(int, input().split())
+g = [input() for _ in range(R)]
+seen = [[False] * C for _ in range(R)]
+count = 0
+def dfs(x, y):
+    global count
+    # TODO: đến đích thì count += 1; ngược lại thử 4 hướng, đánh dấu và hoàn tác
+    pass
+if g[0][0] != '#' and g[R - 1][C - 1] != '#':
+    dfs(0, 0)
+print(count)
+''')
+
+# ---- 40. Đặt dấu phép toán
+def c_ops(inp, out):
+    L = inp.strip().split('\n'); a = list(map(int, L[0].split())); T = int(L[1]); k = len(a)
+    sols = []
+    for ops in _prod('+-*', repeat=k - 1):
+        v = a[0]
+        for o, x in zip(ops, a[1:]): v = v + x if o == '+' else v - x if o == '-' else v * x
+        if v == T: sols.append(ops)
+    if not sols: return out == '0\nKHONG CO\n'
+    first = ''.join(str(a[i]) + (sols[0][i] if i < k - 1 else '') for i in range(k))
+    return out == f'{len(sols)}\n{first}\n'
+def t_ops():
+    ts = [lines('2 3 4', 10), lines('1 2 3', 100), lines('5', 5), lines('5', 6)]
+    for _ in range(8):
+        k = R.randint(3, 8); a = [R.randint(1, 9) for _ in range(k)]
+        v = a[0]
+        for x in a[1:]: v = R.choice([v + x, v - x, v * x])
+        ts.append(lines(nums(a), v))
+    return ts
+P('dat-dau-tinh', 'm11', 2, 'Quay lui: điền dấu phép toán',
+  'Cho k số nguyên dương a₁, …, a_k và số T. Điền vào giữa các số các phép toán <code>+</code>, <code>-</code>, <code>*</code> sao cho biểu thức, <b>tính tuần tự từ trái sang phải</b> như (((a₁ ? a₂) ? a₃) ? …), bằng T (như bài 9 chương 3 giáo trình). In số cách điền, và cách điền đầu tiên theo thứ tự từ điển của dãy phép toán với <code>+</code> &lt; <code>-</code> &lt; <code>*</code>, viết dạng <code>2*3+4</code> (không dấu cách; không in dấu =). Nếu không có cách nào in <code>0</code> rồi <code>KHONG CO</code>.',
+  'Dòng 1: k số. Dòng 2: T.', 'Dòng 1: số cách. Dòng 2: cách đầu tiên hoặc <code>KHONG CO</code>.', '1 ≤ k ≤ 8; 1 ≤ aᵢ ≤ 9; |T| ≤ 10⁷.',
+  [lines('2 3 4', 10), lines('1 2 3', 100)], t_ops(),
+  '''
+a = list(map(int, input().split()))
+T = int(input())
+k = len(a)
+ops = []
+count = 0
+first = None
+def Try(i, value):
+    global count, first
+    if i == k:
+        if value == T:
+            count += 1
+            if first is None:
+                first = ''.join(str(a[j]) + (ops[j] if j < k - 1 else '') for j in range(k))
+        return
+    for o in '+-*':                      # thứ tự thử: + - *
+        ops.append(o)
+        if o == '+':
+            Try(i + 1, value + a[i])
+        elif o == '-':
+            Try(i + 1, value - a[i])
+        else:
+            Try(i + 1, value * a[i])
+        ops.pop()
+Try(1, a[0])
+print(count)
+print(first if first else 'KHONG CO')
+''', c_ops,
+  'Quay lui theo vị trí phép toán i, mang theo giá trị hiện tại (tính từ trái sang phải); thử đúng thứ tự + − * để lấy cách đầu tiên.',
+  'Có 3^(k−1) dãy phép toán (k = 8 ⇒ 2187), vét cạn bằng quay lui là đủ. Nếu thêm phép chia/lấy dư như đề giáo trình thì phải xử lý chia cho 0, nên bài này chỉ dùng + − *. Phía chấm vét cạn bằng <code>itertools.product</code>.',
+  '''
+a = list(map(int, input().split()))
+T = int(input())
+k = len(a)
+# TODO: quay lui chọn phép toán thứ i trong '+-*', mang theo giá trị hiện tại
+''')
+
+# ---- 41. Cái túi không hạn chế
+def c_unb(inp, out):
+    L = inp.strip().split('\n'); n, b = map(int, L[0].split()); c = list(map(int, L[1].split())); a = list(map(int, L[2].split()))
+    got = out.split('\n'); F = int(got[0]); x = list(map(int, got[1].split()))
+    if len(x) != n or any(v < 0 for v in x) or sum(a[i] * x[i] for i in range(n)) > b or sum(c[i] * x[i] for i in range(n)) != F: return False
+    # vét cạn: tối ưu và vector lớn nhất theo từ điển
+    best = (-1, None)
+    def rec(i, rem, vec, val):
+        nonlocal best
+        if i == n:
+            if (val, tuple(vec)) > best[:1] + (best[1] or (),) if best[1] is not None else True: best = (val, tuple(vec))
+            return
+        for t in range(rem // a[i] + 1):
+            rec(i + 1, rem - t * a[i], vec + [t], val + t * c[i])
+    if n <= 4 and b <= 60:
+        rec(0, b, [], 0)
+        return F == best[0] and tuple(x) == best[1]
+    dp = [0] * (b + 1)
+    for w in range(1, b + 1):
+        dp[w] = max([dp[w - 1]] + [dp[w - a[i]] + c[i] for i in range(n) if a[i] <= w])
+    return F == dp[b]
+def t_unb():
+    ts = [lines('3 10', '5 4 3', '4 3 2'), lines('2 7', '3 5', '2 3'), lines('1 10', '2', '3'), lines('2 5', '1 1', '6 7')]
+    for _ in range(5):
+        n = R.randint(2, 4); ts.append(lines(f'{n} {R.randint(10, 60)}', nums([R.randint(1, 20) for _ in range(n)]), nums([R.randint(2, 15) for _ in range(n)])))
+    ts.append(lines('8 1000', nums([R.randint(1, 100) for _ in range(8)]), nums([R.randint(5, 90) for _ in range(8)])))
+    return ts
+P('cai-tui-vo-han', 'm12', 3, 'Bài toán cái túi với số lượng không hạn chế',
+  'Có n loại đồ vật, loại j có giá trị cⱼ và trọng lượng aⱼ, mỗi loại có <b>không hạn chế</b> số lượng. Chọn xⱼ nguyên không âm sao cho Σ aⱼxⱼ ≤ b và Σ cⱼxⱼ lớn nhất. In giá trị tối ưu F, rồi vector x; nếu nhiều phương án tối ưu in phương án lớn nhất theo thứ tự từ điển (so sánh x₁ trước).',
+  'Dòng 1: <code>n b</code>. Dòng 2: c₁ … cₙ. Dòng 3: a₁ … aₙ.', 'Dòng 1: F. Dòng 2: x₁ … xₙ.', '1 ≤ n ≤ 8; 1 ≤ b ≤ 1000; 1 ≤ cⱼ ≤ 100; 1 ≤ aⱼ ≤ 100.',
+  [lines('3 10', '5 4 3', '4 3 2'), lines('2 7', '3 5', '2 3')], t_unb(),
+  '''
+n, b = map(int, input().split())
+c = list(map(int, input().split()))
+a = list(map(int, input().split()))
+best = [[0] * (b + 1) for _ in range(n + 1)]      # best[i][w]: tối ưu khi chỉ dùng loại i..n-1, sức chứa w
+for i in range(n - 1, -1, -1):
+    for w in range(b + 1):
+        best[i][w] = max(t * c[i] + best[i + 1][w - t * a[i]] for t in range(w // a[i] + 1))
+w = b
+x = []
+for i in range(n):                                # chọn số lượng t LỚN NHẤT vẫn đạt tối ưu
+    t = max(t for t in range(w // a[i] + 1) if t * c[i] + best[i + 1][w - t * a[i]] == best[i][w])
+    x.append(t)
+    w -= t * a[i]
+print(best[0][b])
+print(*x)
+''', c_unb,
+  'Quy hoạch động theo loại: best[i][w] = max_t ( t·cᵢ + best[i+1][w − t·aᵢ] ). Dựng lại bằng cách chọn t lớn nhất cho tối ưu để vector lớn nhất theo từ điển.',
+  'Khác bài cái túi 0/1: xⱼ có thể > 1. Giống slide nhánh cận (xⱼ nguyên không âm). Độ phức tạp O(n·b²/a). Với n, b nhỏ vẫn có thể dùng nhánh cận; phía chấm vét cạn khi n ≤ 4 và b ≤ 60.',
+  '''
+n, b = map(int, input().split())
+c = list(map(int, input().split()))
+a = list(map(int, input().split()))
+# TODO: tìm F và vector x (xj nguyên không âm); in F, rồi x
+''')
+
+# ---- 42. Cận dưới ban đầu của nhánh cận người du lịch
+def c_lb(inp, out):
+    L = inp.strip().split('\n'); n = int(L[0]); C = [list(map(int, L[1 + i].split())) for i in range(n)]
+    M = [[None if i == j else C[i][j] for j in range(n)] for i in range(n)]
+    tot = 0
+    for i in range(n):
+        m = min(v for v in M[i] if v is not None); tot += m
+        M[i] = [None if v is None else v - m for v in M[i]]
+    for j in range(n):
+        m = min(M[i][j] for i in range(n) if M[i][j] is not None); tot += m
+        for i in range(n):
+            if M[i][j] is not None: M[i][j] -= m
+    if out != f'{tot}\n': return False
+    if n <= 7:
+        opt = min(sum(C[t[i]][t[(i + 1) % n]] for i in range(n)) for t in ((0,) + p for p in itertools.permutations(range(1, n))))
+        return tot <= opt
+    return True
+def t_lb():
+    ts = [lines(6, '0 3 93 13 33 9', '4 0 77 42 21 16', '45 17 0 36 16 28', '39 90 80 0 56 7', '28 46 88 33 0 25', '3 88 18 46 92 0'), lines(4, '0 10 15 20', '10 0 35 25', '15 35 0 30', '20 25 30 0'), lines(2, '0 5', '7 0')]
+    for n in (3, 4, 5, 5, 6, 7, 8):
+        ts.append(lines(n, *[nums([0 if i == j else R.randint(1, 40) for j in range(n)]) for i in range(n)]))
+    return ts
+P('can-duoi-tsp', 'm13', 2, 'Người du lịch: cận dưới ban đầu bằng rút gọn ma trận',
+  'Cho ma trận chi phí C (đường chéo coi như không được dùng). Bước đầu của thuật toán nhánh cận: <b>rút gọn hàng</b> (trừ giá trị nhỏ nhất của mỗi hàng, không tính đường chéo, khỏi mọi phần tử của hàng) rồi <b>rút gọn cột</b> (trừ giá trị nhỏ nhất của mỗi cột trên ma trận đã rút gọn hàng). Tổng các hằng số đã trừ là <b>cận dưới</b> chi phí mọi hành trình. In cận dưới đó. (Ví dụ giáo trình 2016, n = 6: cận dưới 81.)',
+  'Dòng 1: n. Tiếp theo n dòng ma trận (đường chéo ghi 0, không dùng).', 'Một số nguyên.', '2 ≤ n ≤ 8; 1 ≤ C[i][j] ≤ 100 với i ≠ j.',
+  [lines(6, '0 3 93 13 33 9', '4 0 77 42 21 16', '45 17 0 36 16 28', '39 90 80 0 56 7', '28 46 88 33 0 25', '3 88 18 46 92 0'), lines(2, '0 5', '7 0')], t_lb(),
+  '''
+n = int(input())
+C = [list(map(int, input().split())) for _ in range(n)]
+INF = float('inf')
+for i in range(n):
+    C[i][i] = INF                        # không dùng đường chéo
+total = 0
+for i in range(n):                       # rút gọn hàng
+    m = min(C[i])
+    total += m
+    C[i] = [v - m for v in C[i]]
+for j in range(n):                       # rút gọn cột
+    m = min(C[i][j] for i in range(n))
+    total += m
+    for i in range(n):
+        C[i][j] -= m
+print(total)
+''', c_lb,
+  'Đặt đường chéo bằng ∞ để không bị chọn làm giá trị nhỏ nhất. Cộng các hằng số trừ ở hàng, rồi các hằng số trừ ở cột (sau khi đã rút gọn hàng).',
+  'Mọi hành trình đi qua đúng một ô trên mỗi hàng và mỗi cột, nên trừ hằng số khỏi cả hàng/cột làm chi phí hành trình giảm đúng bằng hằng số đó; tổng hằng số là cận dưới của f*. Phía chấm còn kiểm tra cận ≤ chi phí tối ưu (vét cạn, n ≤ 7).',
+  '''
+n = int(input())
+C = [list(map(int, input().split())) for _ in range(n)]
+INF = float('inf')
+# TODO: đặt đường chéo = INF; rút gọn hàng rồi cột; in tổng hằng số đã trừ
+''')

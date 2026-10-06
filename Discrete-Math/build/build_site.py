@@ -73,7 +73,7 @@ def home_page(done):
             cards+=f'<div class="mod-card" style="opacity:.55;cursor:default"><span class="num">MODULE {idx+1} · {CHAP[mid]}</span><h3>{TITLES[mid]}</h3><p>Sắp có</p></div>'
     body='<h1>Toán rời rạc 1 (INT1358) · Tự học theo đề cương PTIT</h1><p class="lead">13 module bám sát giáo trình PTIT 2016, đề cương INT1358 và đề thi thật (2017–2024): slide có giải thích cho người mới, ví dụ đầy đủ lời giải, mô phỏng tương tác, ngân hàng câu hỏi có giải thích và bài tự luận từng bước.</p>'
     body+=callout('info','Cách học gợi ý','Mỗi module: xem slide → đọc phần “Nội dung chi tiết và ví dụ” → thử mô phỏng → làm quiz 10 câu → luyện ngân hàng câu hỏi → làm tự luận. Trước kỳ thi làm 10 đề trắc nghiệm ở mục Luyện đề.')
-    body+='<h2>Công cụ học tập</h2><div class="grid"><a class="mod-card" href="lap-trinh-python/index.html"><span class="num">THI THỰC HÀNH</span><h3>🐍 Thực hành Python</h3><p>25 bài code, chạy và chấm ngay trong trình duyệt.</p></a><a class="mod-card" href="kiem-tra-dau-vao/index.html"><span class="num">BẮT ĐẦU TẠI ĐÂY</span><h3>🎯 Kiểm tra đầu vào</h3><p>30 câu: biết cần ôn kiến thức nền nào.</p></a><a class="mod-card" href="so-loi/index.html"><span class="num">TIẾN ĐỘ</span><h3>📓 Sổ lỗi &amp; ôn tập</h3><p>Câu sai, lịch ôn cách quãng, tiến độ toàn khóa.</p></a><a class="mod-card" href="thuat-ngu/index.html"><span class="num">SLIDE TIẾNG ANH</span><h3>🔤 Thuật ngữ Việt–Anh</h3><p>110 thuật ngữ, tìm kiếm theo module.</p></a><a class="mod-card" href="cong-thuc/index.html"><span class="num">TRƯỚC KỲ THI</span><h3>∑ Tóm tắt công thức</h3><p>Công thức, khi nào dùng, dạng đề.</p></a></div>'
+    body+='<h2>Công cụ học tập</h2><div class="grid"><a class="mod-card" href="lap-trinh-python/index.html"><span class="num">THI THỰC HÀNH</span><h3>🐍 Thực hành Python</h3><p>42 bài code, chạy và chấm ngay trong trình duyệt.</p></a><a class="mod-card" href="kiem-tra-dau-vao/index.html"><span class="num">BẮT ĐẦU TẠI ĐÂY</span><h3>🎯 Kiểm tra đầu vào</h3><p>30 câu: biết cần ôn kiến thức nền nào.</p></a><a class="mod-card" href="so-loi/index.html"><span class="num">TIẾN ĐỘ</span><h3>📓 Sổ lỗi &amp; ôn tập</h3><p>Câu sai, lịch ôn cách quãng, tiến độ toàn khóa.</p></a><a class="mod-card" href="thuat-ngu/index.html"><span class="num">SLIDE TIẾNG ANH</span><h3>🔤 Thuật ngữ Việt–Anh</h3><p>110 thuật ngữ, tìm kiếm theo module.</p></a><a class="mod-card" href="cong-thuc/index.html"><span class="num">TRƯỚC KỲ THI</span><h3>∑ Tóm tắt công thức</h3><p>Công thức, khi nào dùng, dạng đề.</p></a></div>'
     body+=f'<h2 id="lo-trinh">Lộ trình 13 module</h2><div class="grid">{cards}</div>'
     body+='<h2>Bản đồ môn học</h2><div class="diag"><a href="../assets/diagrams/course-map.png" target="_blank" rel="noopener"><img src="../assets/diagrams/course-map.png" alt="Bản đồ 13 module" loading="lazy" style="max-height:none"></a></div>'
     body+=callout('warn','Về nguồn câu hỏi','Ngân hàng ưu tiên các câu GỐC trích từ tài liệu (ngân hàng câu hỏi 2019, đề thi 2017–2024, bộ đề ôn trắc nghiệm); mỗi câu ghi rõ nguồn. Chỉ khi nguồn gốc quá ít mới có câu “Bổ sung” do chương trình sinh và tự kiểm chứng.')
@@ -164,7 +164,7 @@ def python_page():
     used=sorted({p['mod'] for p in probs})
     meta=dict(mods=[[m,f'Module {int(m[1:])} · {TITLES[m]}'] for m in used],modname={m:f'Module {int(m[1:])}' for m,_ in MODS},slugs=dict(MODS))
     js=json.dumps(meta,ensure_ascii=False).replace('</','<\\/')
-    b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Thực hành Python</div><h1>Thực hành lập trình Python cho Toán rời rạc 1</h1>'
+    b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Thực hành Python</div><h1>Thực hành lập trình Python cho Toán rời rạc 1</h1><p><b>Luyện từng bài</b> · <a href="../thi-thu-python/index.html">Thi thử có đồng hồ</a></p>'
     b+=f'<p class="lead">{len(probs)} bài lập trình bám các dạng của môn: tập hợp, logic, bù trừ, nghiệm nguyên, truy hồi, hàm sinh, sinh cấu hình, quay lui, cái túi, người du lịch. Mỗi bài có đề đầy đủ (dữ liệu vào, kết quả, giới hạn), ví dụ, nhiều test ẩn, gợi ý và lời giải mẫu có giải thích. <b>Code được chạy và chấm ngay trong trình duyệt</b> (Python thật qua Pyodide/WebAssembly, không cần cài gì, không gửi mã đi đâu).</p>'
     b+=callout('warn','Về bài thi thực hành (chưa có thông báo chính thức)','<p>Theo thông tin truyền miệng từ lớp: môn thi bằng <b>Python</b>, hình thức thực hành, khoảng <b>một nửa là code, một nửa là trắc nghiệm</b>; lịch thi chưa có. Chưa có đề mẫu hay quy chế, nên các bài ở đây là <b>bài tự biên soạn bám nội dung và dạng đề của môn</b>, chưa phải đề thi thật.</p><p>Nên hỏi giảng viên hoặc lớp trưởng: (1) số bài, thời gian; (2) nhập/xuất bằng <code>input()</code>/<code>print()</code> hay bằng file; (3) có được dùng thư viện (<code>math</code>, <code>itertools</code>) không; (4) phiên bản Python và môi trường (IDLE, VS Code, trang chấm online); (5) có chấm bằng test ẩn hay chấm tay. Khi có thêm thông tin, hãy gửi cho chúng tôi để chỉnh trang này.</p>')
     b+='<details class="sim"><summary class="simh">📋 Bảng tra Python nhanh cho bài thi (bấm để mở)</summary>'
@@ -174,10 +174,42 @@ def python_page():
     b+='</details>'
     b+=f'<div id="pyroot"></div><script type="application/json" id="py-meta">{js}</script>'
     b+=callout('info','Cách chấm','Mỗi bài có vài test ví dụ (hiện trước) và các test ẩn (có cả trường hợp biên và dữ liệu lớn). “Nộp bài” chạy mọi test, mỗi test giới hạn 8 giây trên trình duyệt (chậm hơn máy thật khoảng 2 đến 3 lần). So khớp bỏ qua dấu cách thừa cuối dòng và dòng trống cuối. Mã của bạn tự lưu trong trình duyệt. Đáp án mọi test đã được kiểm chứng bằng một cách giải khác (vét cạn hoặc công thức khác). Cần mạng để tải Pyodide (~10 MB) từ CDN lần đầu.')
-    return page('Thực hành Python',b,2,'Luyện lập trình Python cho Toán rời rạc 1, tự chấm trong trình duyệt',scripts=('pyjudge.js','pycode.js'))
+    return page('Thực hành Python',b,2,'Luyện lập trình Python cho Toán rời rạc 1, tự chấm trong trình duyệt',scripts=PY_SCRIPTS+('pycommon.js','pyjudge.js','pycode.js'),extra_head=PY_HEAD)
 _old3=build_extra
 def build_extra():
     _old3(); write('vi/lap-trinh-python/index.html',python_page())
+
+CM_BASE='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/'
+PY_HEAD=f'<link rel="stylesheet" href="{CM_BASE}codemirror.min.css"><link rel="stylesheet" href="../../_shared/pycode.css">'
+PY_SCRIPTS=tuple(CM_BASE+f for f in ('codemirror.min.js','mode/python/python.min.js','addon/edit/closebrackets.min.js','addon/edit/matchbrackets.min.js','addon/selection/active-line.min.js'))
+APPS_SCRIPT = """function doPost(e) {
+  var d = JSON.parse(e.postData.contents);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName('KetQua') || ss.insertSheet('KetQua');
+  if (sh.getLastRow() === 0) sh.appendRow(['Nhận lúc','Họ tên','Mã SV','Đề','Điểm /10','Test đúng','Tổng test','Giây làm bài','Chi tiết từng bài (JSON, gồm mã nguồn)']);
+  sh.appendRow([new Date(), d.name, d.sid, d.setTitle, d.score, d.passed, d.total, d.usedSec, JSON.stringify(d.problems).slice(0, 49000)]);
+  return ContentService.createTextOutput('ok');
+}"""
+def python_exam_page():
+    probs=json.load(open(os.path.join(ROOT,'data','python','problems.json'),encoding='utf-8'))
+    meta=dict(mods=[],modname={m:f'Module {int(m[1:])}' for m,_ in MODS},slugs=dict(MODS))
+    js=json.dumps(meta,ensure_ascii=False).replace('</','<\\/')
+    b='<div class="crumbs"><a href="../index.html">Trang chủ</a> › Thi thử Python</div><h1>Thi thử lập trình Python có đồng hồ</h1>'
+    b+='<p><a href="../lap-trinh-python/index.html">Luyện từng bài</a> · <b>Thi thử có đồng hồ</b></p>'
+    b+='<p class="lead">12 đề cố định (mỗi đề 3 bài từ dễ đến khó, đủ các chương) và chế độ bốc đề ngẫu nhiên 3 đến 5 bài. Đồng hồ đếm ngược theo mốc thời gian, hết giờ tự chấm; điểm theo tỉ lệ test đúng, test ẩn không lộ trong lúc thi.</p>'
+    b+=callout('warn','Lưu ý','Chưa có thông báo chính thức về hình thức thi (số bài, thời gian, môi trường). Các đề này tự biên soạn để tập phản xạ và tốc độ, chưa phải đề thật; thời gian và độ khó chỉ mang tính ước lượng.')
+    b+='<div id="pyexam"></div>'
+    b+=f'<script type="application/json" id="py-meta">{js}</script>'
+    b+='<details class="sim"><summary class="simh">🛠 Dành cho người tổ chức: nhận kết quả về Google Sheet (không cần máy chủ riêng)</summary>'
+    b+='<p>Trang web tĩnh không có máy chủ, nên mặc định kết quả chỉ nằm trong trình duyệt của người thi (họ tải file .json hoặc sao chép tóm tắt để gửi). Muốn kết quả tự về một nơi, hãy dùng Google Apps Script làm “hộp thư”:</p>'
+    b+=ul(['Tạo một Google Sheet mới, vào <b>Tiện ích mở rộng ▸ Apps Script</b>, dán đoạn mã bên dưới.','<b>Triển khai ▸ Triển khai mới ▸ Ứng dụng web</b>: “Thực thi với tư cách: tôi”, “Ai có quyền truy cập: bất kỳ ai”. Sao chép URL kết thúc bằng <code>/exec</code>.','Mở <code>data/python/config.json</code> trong repo, điền <code>{"submitUrl": "URL vừa sao chép"}</code>, rồi commit và push. Từ đó màn kết quả có thêm nút “Gửi kết quả”.'],True)
+    b+=code(APPS_SCRIPT)
+    b+=ul(['<b>Quyền riêng tư:</b> nút gửi chỉ hiện khi đã cấu hình, và chỉ gửi sau khi người thi tích đồng ý; dữ liệu gồm họ tên, mã SV, điểm và mã nguồn. URL <code>/exec</code> nằm công khai trong repo nên ai cũng có thể gửi dữ liệu giả vào Sheet.','<b>Độ tin cậy:</b> điểm được tính ngay trên máy người thi nên có thể bị chỉnh sửa. Vì payload có đủ mã nguồn, người chấm có thể chạy lại mã để chấm lại; đừng dùng điểm này làm điểm chính thức.','<b>Phản hồi:</b> trình duyệt chặn đọc phản hồi của máy chủ khác miền (chế độ <code>no-cors</code>), nên trang không xác nhận được việc gửi đã thành công; hãy luôn giữ file .json dự phòng.','Không đưa token hay mật khẩu vào repo công khai; các cách ghi thẳng vào GitHub (Issues, Contents API) cần token nên không an toàn cho trang tĩnh.'])
+    b+='</details>'
+    return page('Thi thử Python',b,2,'Thi thử lập trình Python có đồng hồ cho Toán rời rạc 1',scripts=PY_SCRIPTS+('pycommon.js','pyjudge.js','pyexam.js'),extra_head=PY_HEAD)
+_old4=build_extra
+def build_extra():
+    _old4(); write('vi/thi-thu-python/index.html',python_exam_page())
 
 
 if __name__=='__main__':

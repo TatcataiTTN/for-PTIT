@@ -1,0 +1,33 @@
+/* Giao diện luyện/thi code Python: CodeMirror theo giao diện sáng/tối/sepia, bố cục hai cột, thanh thi có đồng hồ */
+:root{--py-kw:#8250df;--py-str:#0a7d3e;--py-num:#b35900;--py-com:#6e7781;--py-def:#0550ae;--py-bi:#cf222e}
+:root[data-theme="dark"]{--py-kw:#d2a8ff;--py-str:#7ee787;--py-num:#ffa657;--py-com:#8b949e;--py-def:#79c0ff;--py-bi:#ff7b72}
+.CodeMirror{font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);height:auto}
+.CodeMirror-scroll{min-height:240px;max-height:62vh}
+.CodeMirror-gutters{background:var(--bg);border-right:1px solid var(--border)}
+.CodeMirror-linenumber{color:var(--muted)}
+.CodeMirror-cursor{border-left:1.6px solid var(--text)}
+.CodeMirror-activeline-background{background:rgba(127,127,127,.10)}
+.CodeMirror-selected{background:rgba(70,130,230,.28)!important}
+.CodeMirror-focused{outline:2px solid var(--accent2);outline-offset:0}
+.CodeMirror-matchingbracket{outline:1px solid var(--accent);color:inherit!important}
+.cm-s-ptit .cm-keyword,.cm-s-default .cm-keyword{color:var(--py-kw)}.cm-s-ptit .cm-string,.cm-s-default .cm-string{color:var(--py-str)}
+.cm-s-ptit .cm-number,.cm-s-default .cm-number{color:var(--py-num)}.cm-s-ptit .cm-comment,.cm-s-default .cm-comment{color:var(--py-com);font-style:italic}
+.cm-s-ptit .cm-def,.cm-s-default .cm-def{color:var(--py-def)}.cm-s-ptit .cm-builtin,.cm-s-default .cm-builtin{color:var(--py-bi)}
+.cm-s-ptit .cm-variable,.cm-s-ptit .cm-variable-2,.cm-s-ptit .cm-operator,.cm-s-ptit .cm-meta{color:var(--text)}
+.py-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:18px;align-items:start}
+.py-split>.py-left{min-width:0}.py-split>.py-right{min-width:0;position:sticky;top:60px}
+@media (max-width:980px){.py-split{grid-template-columns:1fr}.py-split>.py-right{position:static}}
+.py-bar{position:sticky;top:52px;z-index:15;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+.py-timer{font:700 1.35rem/1 ui-monospace,Menlo,monospace;padding:6px 12px;border-radius:8px;background:var(--code);min-width:92px;text-align:center}
+.py-timer.warn{background:var(--warnbg);color:var(--warn)}.py-timer.bad{background:var(--badbg);color:var(--bad);animation:pyblink 1s steps(2) infinite}
+@keyframes pyblink{50%{opacity:.55}}
+.py-pal{display:flex;gap:6px;flex-wrap:wrap}
+.py-pal button{font:inherit;font-size:.86rem;min-width:38px;padding:5px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer}
+.py-pal button.cur{outline:2px solid var(--accent2)}.py-pal button.ok{background:var(--goodbg);border-color:var(--good)}.py-pal button.part{background:var(--warnbg);border-color:var(--warn)}.py-pal button.bad{background:var(--badbg);border-color:var(--bad)}
+.py-prog{height:8px;border-radius:6px;background:var(--border);overflow:hidden;min-width:120px}.py-prog>i{display:block;height:100%;background:var(--good)}
+.py-chip{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:2px 10px;margin:2px;font-size:.82rem;background:var(--bg);color:var(--text);cursor:pointer}.py-chip.on{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.py-out{white-space:pre-wrap;word-break:break-word;font:12.5px/1.5 ui-monospace,Menlo,monospace;background:var(--code);border-radius:8px;padding:8px 10px;margin:4px 0;max-height:260px;overflow:auto}
+.py-score{font-size:2.2rem;font-weight:800;color:var(--accent)}
+.py-ver{display:inline-block;min-width:22px;text-align:center;border-radius:5px;padding:0 5px;margin:1px;font:700 .8rem ui-monospace,monospace}
+.py-ver.AC{background:var(--goodbg);color:var(--good)}.py-ver.WA,.py-ver.RE,.py-ver.TLE{background:var(--badbg);color:var(--bad)}
+@media print{.py-bar,header.top,footer{display:none}}
