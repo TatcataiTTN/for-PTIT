@@ -20,7 +20,7 @@ function showList(){
   chips('Mức:',[['all','Mọi mức'],['1','Cơ bản'],['2','Vừa'],['3','Khó']],'lv');
   chips('Trạng thái:',[['all','Tất cả'],['todo','Chưa giải'],['ok','Đã giải'],['viewed','Đã xem lời giải']],'stat');
   var sq=el('input');sq.type='search';sq.placeholder='Tìm bài…';sq.value=st.q;sq.style.cssText='margin:8px 0;padding:7px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;width:100%;max-width:340px';
-  var box=el('div','grid');sq.oninput=function(){st.q=sq.value;fill()};root.appendChild(sq);root.appendChild(box);
+  var box=el('div','grid');box.id='pycards';sq.oninput=function(){st.q=sq.value;fill()};root.appendChild(sq);root.appendChild(box);
   function fill(){box.innerHTML='';var n=0;P.forEach(function(p){
     if(!((st.mod==='all'||p.mod===st.mod)&&(st.lv==='all'||String(p.lv)===st.lv)&&(st.stat==='all'||statusOf(p,s)===st.stat)&&(!st.q||(p.title+' '+p.stmt).toLowerCase().indexOf(st.q.toLowerCase())>=0)))return;n++;
     var a=el('a','mod-card');a.href='#'+p.id;var t=statusOf(p,s);
